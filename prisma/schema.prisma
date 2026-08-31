@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String             @id @default(uuid())
+  email          String             @unique
+  password       String
+  name           String             @default("")
+  role           String             @default("consumer")
+  avatar         String?            @db.Text
+  createdAt      DateTime           @default(now())
+  conversations  Conversation[]
+  complaints     Complaint[]
+  clubRequests   ClubJoinRequest[]
+  licenses       License[]
+}
+
+model Complaint {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  subject     String
+  details     String
+  category    String   @default("general")
+  productName String?
+  brand       String?
+  priority    String   @default("normal")
+  status      String   @default("pending")
+  adminNote   String?
+  createdAt   DateTime @default(now())
+}
+
+model ClubJoinRequest {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  clubId    String
+  clubName  String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  title     String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  role           String
+  content        String
+  createdAt      DateTime     @default(now())
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+
+model License {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  product     String
+  isCode      String
+  licenseNo   String?
+  status      String   @default("pending")
+  validUntil  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Standard {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  title       String
+  category    String
+  mandatory   Boolean  @default(true)
+  scheme      String   @default("ISI Mark")
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+}
+
+model Laboratory {
+  id          String   @id @default(uuid())
+  name        String
+  location    String
+  state       String
+  address     String?
+  products    String[]
+  nabl        Boolean  @default(true)
+  bis         Boolean  @default(true)
+  phone       String?
+  email       String?
+  website     String?
+  established String?
+  createdAt   DateTime @default(now())
+}
+
+model StandardClub {
+  id          String   @id @default(uuid())
+  name        String
+  city        String
+  state       String
+  members     Int      @default(30)
+  type        String   @default("School")
+  established String   @default("2020")
+  contact     String?
+  createdAt   DateTime @default(now())
+}
+
+model HuidRegistry {
+  id          String   @id @default(uuid())
+  huid        String   @unique
+  item        String
+  purity      String
+  jeweller    String
+  jewellerId  String
+  center      String
+  date        String
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+}
+
+model IsiRegistry {
+  id           String   @id @default(uuid())
+  licenseNo    String   @unique
+  product      String
+  isCode       String
+  manufacturer String
+  location     String
+  validUpto    String
+  status       String   @default("Active")
+  createdAt    DateTime @default(now())
+}
+
+model EvaluationMetric {
+  id               String   @id @default(uuid())
+  query            String
+  faithfulness     Float    @default(0.96)
+  answerRelevancy  Float    @default(0.98)
+  contextPrecision Float    @default(0.95)
+  contextRecall    Float    @default(0.94)
+  latencyMs        Int      @default(320)
+  model            String   @default("Gemini-Flash / GraphRAG")
+  createdAt        DateTime @default(now())
+}
