@@ -1,11 +1,13 @@
 # 🇮🇳 Bureau of Indian Standards (BIS) — Intelligent Assistant Platform
 
 [![Live Demo](https://img.shields.io/badge/Production-Live%20Demo-003366?style=for-the-badge&logo=vercel)](https://bis-assistant.vercel.app)
+[![CI](https://github.com/Kaustubh-Barad-007/bis-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/Kaustubh-Barad-007/bis-assistant/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/Neon-PostgreSQL-00E599?style=for-the-badge&logo=postgresql)](https://neon.tech/)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini%202.5-4285F4?style=for-the-badge&logo=google)](https://ai.google.dev/)
+
 
 An intelligent conversational AI platform built for the **Bureau of Indian Standards (BIS)**, Ministry of Consumer Affairs, Food & Public Distribution, Government of India.
 
