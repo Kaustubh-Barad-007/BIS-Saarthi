@@ -1,10 +1,10 @@
-# Logs and scratch files
+# Environment variables
+.env
+.env*.local
+
+# Logs
 logs
 *.log
-*.txt
-*.cjs
-*.py
-*.bak
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -15,9 +15,6 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.*
-!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -32,3 +29,8 @@ dist-ssr
 
 .vercel
 
+# Temp scripts & text logs
+*.py
+*.cjs
+*.bak
+*.txt

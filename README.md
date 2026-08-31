@@ -61,7 +61,7 @@ Complete UI translations and native language AI prompting across:
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/Kaustubh-Barad-007/bis-assistant.git
+git clone https://github.com/BaradKaustubh/bis-assistant.git
 cd bis-assistant
 npm install
 ```
