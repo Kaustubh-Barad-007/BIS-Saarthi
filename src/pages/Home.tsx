@@ -1,3 +1,4 @@
+import { useLanguage } from '@/lib/LanguageContext';
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/lib/ThemeContext";
@@ -6,6 +7,8 @@ import Logo from "@/components/Logo";
 import { useEffect } from "react";
 
 export default function Home() {
+  const { t } = useLanguage();
+
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 

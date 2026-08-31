@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, MessageSquare, Activity, AlertTriangle, CheckCircle2, TrendingUp, Shield, Library, FileText, Upload } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Stats {
   totalUsers: number;
@@ -16,36 +17,51 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalComplaints: 0, queriesToday: 0, activeSessions: 0 });
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
+  const { t } = useLanguage();
 
   const [allComplaints, setAllComplaints] = useState<any[]>([]);
   const [allLicenses, setAllLicenses] = useState<any[]>([]);
   const [clubRequests, setClubRequests] = useState<any[]>([]);
 
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch("/api/stats", { headers: { Authorization:  `Bearer ${token}`  } });
+        const res = await fetch("/api/stats", { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) setStats(await res.json());
       } catch (err) { console.error(err); } finally { setLoading(false); }
     };
+    
     fetchStats();
+    const interval = setInterval(fetchStats, 5000); // Realtime polling every 5s
+    return () => clearInterval(interval);
   }, [token]);
 
   useEffect(() => {
-    
+    const fetchTabData = async () => {
       if (activeTab === "Licenses") {
         fetch("/api/licenses", { headers: { Authorization: `Bearer ${token}` } })
           .then(res => res.json())
           .then(data => setAllLicenses(Array.isArray(data) ? data : []))
           .catch(err => console.error(err));
+      } else if (activeTab === "Complaints") {
+        fetch("/api/complaints", { headers: { Authorization: `Bearer ${token}` } })
+          .then(res => res.json())
+          .then(data => setAllComplaints(Array.isArray(data) ? data : (data.complaints || [])))
+          .catch(err => console.error(err));
+      } else if (activeTab === "Club Requests") {
+        fetch("/api/clubs", { headers: { Authorization: `Bearer ${token}` } })
+          .then(res => res.json())
+          .then(data => setClubRequests(Array.isArray(data.userRequests) ? data.userRequests : []))
+          .catch(err => console.error(err));
       }
-      if (activeTab === "Complaints") {
-      fetch("/api/complaints", { headers: { Authorization:  `Bearer ${token}`  } })
-        .then(res => res.json())
-        .then(data => setAllComplaints(Array.isArray(data) ? data : (data.complaints || [])))
-        .catch(err => console.error(err));
-    }
+    };
+    
+    fetchTabData();
+    const interval = setInterval(fetchTabData, 5000);
+    return () => clearInterval(interval);
   }, [activeTab, token]);
+
 
   useEffect(() => {
     if (activeTab === "Club Requests") {

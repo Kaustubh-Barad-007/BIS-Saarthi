@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/lib/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
@@ -8,6 +9,8 @@ import Logo from '@/components/Logo';
 import { useGoogleLogin } from '@react-oauth/google';
 
 export default function AuthScreen({ type }: { type: 'login' | 'register' }) {
+  const { t } = useLanguage();
+
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();

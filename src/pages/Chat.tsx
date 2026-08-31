@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Send, User, Plus, Trash2, PanelLeftClose, PanelLeftOpen, Globe, Sun, Moon, LogOut, MessageSquare, ChevronDown, Mic, Paperclip, Copy, Download, Check, CheckCircle2, Volume2, ThumbsUp, ThumbsDown, AlertCircle, X, ShieldCheck, RefreshCcw, Search, Building2, FileText, MapPin, Activity, Library, Calculator, ExternalLink, Upload, Info, HelpCircle, Layers , Image, MoreVertical, Edit3, Pin, Share2 } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
-import { t } from '@/lib/i18n';
+import { t as tLib } from '@/lib/i18n';
 
 interface Message {
   id: string;
@@ -49,25 +50,25 @@ const LANGUAGES = [
 const getSuggestions = (role: string, lang: string): string[] => {
   if (role === 'manufacturer') {
     return [
-      t(lang, 'suggestCrs'),
-      t(lang, 'suggestFees'),
-      t(lang, 'suggestElectronics'),
-      t(lang, 'suggestLabs'),
+      tLib(lang, 'suggestCrs'),
+      tLib(lang, 'suggestFees'),
+      tLib(lang, 'suggestElectronics'),
+      tLib(lang, 'suggestLabs'),
     ];
   }
   if (role === 'admin') {
     return [
-      t(lang, 'suggestRegulations'),
-      t(lang, 'suggestMandatory'),
-      t(lang, 'suggestCrs'),
-      t(lang, 'suggestLabs'),
+      tLib(lang, 'suggestRegulations'),
+      tLib(lang, 'suggestMandatory'),
+      tLib(lang, 'suggestCrs'),
+      tLib(lang, 'suggestLabs'),
     ];
   }
   return [
-    t(lang, 'suggestLabs'),
-    t(lang, 'suggestFees'),
-    t(lang, 'suggestStandard'),
-    t(lang, 'suggestTrack'),
+    tLib(lang, 'suggestLabs'),
+    tLib(lang, 'suggestFees'),
+    tLib(lang, 'suggestStandard'),
+    tLib(lang, 'suggestTrack'),
   ];
 };
 
@@ -158,12 +159,12 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
   const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(!hideSidebar);
-  const [language, setLanguage] = useState('en');
+  const { language, setLanguage, t } = useLanguage();
   
   const getWelcomeMsg = (role: string, lang: string) => {
-    if (role === 'manufacturer') return t(lang, 'welcomeManufacturer');
-    if (role === 'admin') return t(lang, 'welcomeAdmin');
-    return t(lang, 'welcomeConsumer');
+    if (role === 'manufacturer') return tLib(lang, 'welcomeManufacturer');
+    if (role === 'admin') return tLib(lang, 'welcomeAdmin');
+    return tLib(lang, 'welcomeConsumer');
   };
 
   const [messages, setMessages] = useState<Message[]>([
@@ -474,11 +475,21 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
   const readAloud = (text: string) => {
     if (!window.speechSynthesis) return showToast('Text-to-speech not supported.', 'error');
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g, ''));
-    utterance.lang = language === 'en' ? 'en-IN' : `${language}-IN`;
     
-    // Also try to find an exact matching voice to ensure it works cross-browser
+    const utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g, ''));
+    
+    // Map language to BCP-47 for TTS
+    const bcp47Map: Record<string, string> = {
+      en: 'en-IN', hi: 'hi-IN', mr: 'mr-IN', bn: 'bn-IN', ta: 'ta-IN', te: 'te-IN',
+      gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN', pa: 'pa-IN', or: 'or-IN', as: 'as-IN'
+    };
+    utterance.lang = bcp47Map[language] || 'en-IN';
+
     const voices = window.speechSynthesis.getVoices();
+    const voice = voices.find(v => v.lang.startsWith(utterance.lang) || v.lang.startsWith(language));
+    if (voice) utterance.voice = voice;
+
+    const voices_dummy = [];
     const matchingVoice = voices.find(v => v.lang.startsWith(utterance.lang) || v.lang.startsWith(language));
     if (matchingVoice) utterance.voice = matchingVoice;
 
@@ -793,7 +804,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
     e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
   };
 
-  const roleLabel = t(language, userRole) || userRole;
+  const roleLabel = t(userRole) || userRole;
 
   return (
     <div className="app-layout" style={{ height: '100vh' }}>
@@ -829,7 +840,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                 <PanelLeftClose size={18} />
               </button>
               <button className="btn btn-primary" onClick={startNewChat} style={{ flex: 1, justifyContent: 'space-between', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
-                <span style={{ fontWeight: 600 }}>{t(language, 'newChat')}</span>
+                <span style={{ fontWeight: 600 }}>{t('newChat')}</span>
                 <Plus size={16} />
               </button>
             </div>
@@ -964,7 +975,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               {/* Unpinned Recent Chats */}
               {conversations.filter(c => !pinnedChatIds.includes(c.id) && (!chatSearch || c.title.toLowerCase().includes(chatSearch.toLowerCase()))).length > 0 && (
                 <>
-                  <div className="sidebar-section-label">{t(language, 'recent')}</div>
+                  <div className="sidebar-section-label">{t('recent')}</div>
                   {conversations
                     .filter(c => !pinnedChatIds.includes(c.id) && (!chatSearch || c.title.toLowerCase().includes(chatSearch.toLowerCase())))
                     .map(c => {
@@ -1058,7 +1069,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
 
               {conversations.length === 0 && (
                 <div style={{ padding: '16px 10px', fontSize: '0.8125rem', color: 'var(--text-muted)', textAlign: 'center', whiteSpace: 'pre-line' }}>
-                  {t(language, 'noConversations')} 
+                  {t('noConversations')} 
                 </div>
               )}
             </div>
@@ -1069,13 +1080,13 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               {userRole === 'manufacturer' && (
                 <>
                   <button className={`sidebar-item ${activeView === 'standards' ? 'active' : ''}`} onClick={() => { setActiveView('standards' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
-                    <Library size={15} /> {t(language, 'standardsDir')}
+                    <Library size={15} /> {t('standardsDir')}
                   </button>
                   <button className={`sidebar-item ${activeView === 'guide' ? 'active' : ''}`} onClick={() => { setActiveView('guide' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
-                    <FileText size={15} /> {t(language, 'certGuide')}
+                    <FileText size={15} /> {t('certGuide')}
                   </button>
                   <button className={`sidebar-item ${activeView === 'calculator' ? 'active' : ''}`} onClick={() => { setActiveView('calculator' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
-                    <Calculator size={15} /> {t(language, 'feeEstimator')}
+                    <Calculator size={15} /> {t('feeEstimator')}
                   </button>
                   
                 </>
@@ -1085,7 +1096,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               {userRole === 'consumer' && (
                 <>
                   <button className={`sidebar-item ${activeView === 'verify' ? 'active' : ''}`} onClick={() => { setActiveView('verify' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
-                    <ShieldCheck size={15} /> {t(language, 'verifyISI')}
+                    <ShieldCheck size={15} /> {t('verifyISI')}
                   </button>
                   <button className={`sidebar-item ${activeView === 'complaints_hub' ? 'active' : ''}`} onClick={() => { setActiveView('complaints_hub' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
                       <AlertCircle size={15} /> Complaints
@@ -1101,7 +1112,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               {/* Common */}
               <div className="divider" style={{ margin: '4px 0', borderBottom: '1px solid var(--border-glass)' }} />
               <button className={`sidebar-item ${activeView === 'faq' ? 'active' : ''}`} onClick={() => { setActiveView('faq' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
-                <HelpCircle size={15} /> {t(language, 'helpFaq')}
+                <HelpCircle size={15} /> {t('helpFaq')}
               </button>
               <button className={`sidebar-item ${activeView === 'about' ? 'active' : ''}`} onClick={() => { setActiveView('about' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
                   <Info size={15} /> About BIS
@@ -1395,7 +1406,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                     value={input}
                     onChange={handleTextarea}
                     onKeyDown={handleKey}
-                    placeholder={t(language, 'placeholder')}
+                    placeholder={t('placeholder')}
                     rows={1}
                   />
                   <button onClick={toggleListening} style={{ width: 44, height: 52, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: isListening ? 'var(--danger)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1422,27 +1433,27 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'standards' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Library size={28} color="var(--accent)" /> {t(language, 'standardsDir')}</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'standardsSubtitle')}</p>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Library size={28} color="var(--accent)" /> {t('standardsDir')}</h2>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('standardsSubtitle')}</p>
             </div>
             
             <div style={{ position: 'relative', maxWidth: 800, marginBottom: 24 }}>
               <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input type="text" placeholder={t(language, 'standardsSearchPlaceholder')} className="form-input" style={{ paddingLeft: 48, height: 52 }} value={standardsSearch} onChange={e => setStandardsSearch(e.target.value)} />
+              <input type="text" placeholder={t('standardsSearchPlaceholder')} className="form-input" style={{ paddingLeft: 48, height: 52 }} value={standardsSearch} onChange={e => setStandardsSearch(e.target.value)} />
             </div>
 
             {loadingStandards ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{[1,2,3].map(i => <div key={i} style={{ height: 80, borderRadius: 20, background: 'var(--bg-glass-strong)', opacity: 0.6 }} />)}</div>
             ) : standardsResults.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>{t(language, 'noStandards')}</div>
+              <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>{t('noStandards')}</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 900 }}>
                 {standardsResults.map((std: any, i: number) => (
                   <div key={i} style={{ padding: 20, background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                       <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--accent)' }}>{std.code}</h3>
-                      {std.mandatory && <span className="pill pill-red" style={{ fontSize: '0.7rem' }}>{t(language, 'mandatory')} ({std.scheme})</span>}
-                      {!std.mandatory && <span className="pill pill-blue" style={{ fontSize: '0.7rem' }}>{t(language, 'voluntary')}</span>}
+                      {std.mandatory && <span className="pill pill-red" style={{ fontSize: '0.7rem' }}>{t('mandatory')} ({std.scheme})</span>}
+                      {!std.mandatory && <span className="pill pill-blue" style={{ fontSize: '0.7rem' }}>{t('voluntary')}</span>}
                     </div>
                     <p style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: 8 }}>{std.title}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
@@ -1458,8 +1469,8 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'guide' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><FileText size={28} color="var(--accent)" /> {t(language, 'certGuide')}</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'certGuideSubtitle')}</p>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><FileText size={28} color="var(--accent)" /> {t('certGuide')}</h2>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('certGuideSubtitle')}</p>
             </div>
             
             <div style={{ maxWidth: 800, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -1487,15 +1498,15 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'calculator' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Calculator size={28} color="var(--accent)" /> {t(language, 'feeEstimator')}</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'calcSubtitle')}</p>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Calculator size={28} color="var(--accent)" /> {t('feeEstimator')}</h2>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('calcSubtitle')}</p>
             </div>
             
             <div style={{ maxWidth: 600, padding: 32, background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 24 }}>
               <div className="form-group" style={{ marginBottom: 20 }}>
-                <label className="form-label">{t(language, 'enterpriseType')}</label>
+                <label className="form-label">{t('enterpriseType')}</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                  {[t(language, 'microScale'), t(language, 'smallScale'), t(language, 'largeScale')].map((tLabel, i) => (
+                  {[t('microScale'), t('smallScale'), t('largeScale')].map((tLabel, i) => (
                     <button key={i} onClick={() => setFeeCategory(['micro', 'small', 'large'][i])} style={{ padding: '10px', borderRadius: 12, border: `1px solid ${feeCategory === ['micro', 'small', 'large'][i] ? 'var(--accent)' : 'var(--border-glass)'}`, background: feeCategory === ['micro', 'small', 'large'][i] ? 'var(--accent-muted)' : 'var(--bg-hover)', color: feeCategory === ['micro', 'small', 'large'][i] ? 'var(--accent)' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>
                       {tLabel}
                     </button>
@@ -1503,32 +1514,32 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                 </div>
               </div>
               <div className="form-group" style={{ marginBottom: 24 }}>
-                <label className="form-label">{t(language, 'turnoverLabel')}</label>
+                <label className="form-label">{t('turnoverLabel')}</label>
                 <input type="number" placeholder="e.g. 5000000" value={feeTurnover} onChange={e => setFeeTurnover(e.target.value)} className="form-input" />
               </div>
               
               <div style={{ marginTop: 32, padding: 20, background: 'var(--bg-hover)', borderRadius: 16, border: '1px solid var(--border-glass)' }}>
-                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{t(language, 'feeBreakdown')}</h4>
+                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{t('feeBreakdown')}</h4>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: 'var(--text-secondary)' }}>
-                  <span>{t(language, 'appFee')}</span>
+                  <span>{t('appFee')}</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>₹1,000</span>
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: 'var(--text-secondary)' }}>
-                  <span>{t(language, 'inspectionFee')}</span>
+                  <span>{t('inspectionFee')}</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>₹7,000</span>
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, color: 'var(--text-secondary)' }}>
-                  <span>{t(language, 'markingFee')}</span>
+                  <span>{t('markingFee')}</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                     {feeCategory === 'micro' ? '₹20,000 (with 80% concession)' : feeCategory === 'small' ? '₹40,000 (with 50% concession)' : '₹80,000+'}
                   </span>
                 </div>
                 
                 <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: 16, display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent)' }}>
-                  <span>{t(language, 'totalBaseline')}</span>
+                  <span>{t('totalBaseline')}</span>
                   <span>{feeCategory === 'micro' ? '₹28,000' : feeCategory === 'small' ? '₹48,000' : '₹88,000'}</span>
                 </div>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8, textAlign: 'center' }}>* Does not include independent lab testing charges or actual marking fee calculated on per-unit basis.</p>
@@ -1541,12 +1552,12 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 28 }}>
               <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                <ShieldCheck size={28} color="var(--accent)" /> {t(language, 'verifyISI')}
+                <ShieldCheck size={28} color="var(--accent)" /> {t('verifyISI')}
               </h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'verifySubtitle')}</p>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('verifySubtitle')}</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12, marginBottom: 24 }}>
-              {[{ label: t(language, 'huidLabel'), example: 'A1B2C3', desc: '6-character code on jewellery', icon: '💍' }, { label: t(language, 'isiLabel'), example: 'CM/L-1234567', desc: '7+ digit CM/L number on product', icon: '🏭' }].map((tip, i) => (
+              {[{ label: t('huidLabel'), example: 'A1B2C3', desc: '6-character code on jewellery', icon: '💍' }, { label: t('isiLabel'), example: 'CM/L-1234567', desc: '7+ digit CM/L number on product', icon: '🏭' }].map((tip, i) => (
                 <div key={i} style={{ padding: '16px 20px', background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 20, display: 'flex', gap: 14 }}>
                   <span style={{ fontSize: '1.5rem' }}>{tip.icon}</span>
                   <div><div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem', marginBottom: 4 }}>{tip.label}</div><div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: 6 }}>{tip.desc}</div><code style={{ background: 'var(--bg-hover)', padding: '2px 8px', borderRadius: 6, fontSize: '0.82rem', color: 'var(--accent)' }}>{tip.example}</code></div>
@@ -1556,12 +1567,12 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
             <div className="card" style={{ maxWidth: 640 }}>
               <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">{t(language, 'verifyInputLabel')}</label>
+                  <label className="form-label">{t('verifyInputLabel')}</label>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <input name="code" required className="form-input" style={{ flex: 1, fontSize: '1.05rem', textTransform: 'uppercase', letterSpacing: 2, height: 52 }} placeholder="e.g. A1B2C3 or CM/L-7654321" />
                     <button type="submit" disabled={verifying} className="btn btn-primary" style={{ height: 52, padding: '0 24px', fontWeight: 600, gap: 8, flexShrink: 0 }}>
                       {verifying ? <span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid white', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} /> : <Search size={18} />}
-                      {t(language, 'verifyBtn')}
+                      {t('verifyBtn')}
                     </button>
                   </div>
                 </div>
@@ -1604,13 +1615,13 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'complaints_hub' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 28 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><AlertCircle size={28} color="var(--accent)" /> {t(language, 'fileComplaint')}</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'complaintsSubtitle')}</p>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><AlertCircle size={28} color="var(--accent)" /> {t('fileComplaint')}</h2>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('complaintsSubtitle')}</p>
             </div>
             
             <div style={{ display: 'flex', gap: 10, marginBottom: 24, background: 'var(--bg-glass-strong)', padding: 6, borderRadius: 14, width: 'fit-content' }}>
-              <button className={`btn ${complaintTab === 'file' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setComplaintTab('file')} style={{ borderRadius: 10 }}>{t(language, 'fileTab')}</button>
-              <button className={`btn ${complaintTab === 'track' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setComplaintTab('track')} style={{ borderRadius: 10 }}>{t(language, 'trackTab')}</button>
+              <button className={`btn ${complaintTab === 'file' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setComplaintTab('file')} style={{ borderRadius: 10 }}>{t('fileTab')}</button>
+              <button className={`btn ${complaintTab === 'track' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setComplaintTab('track')} style={{ borderRadius: 10 }}>{t('trackTab')}</button>
             </div>
 
             {complaintTab === 'file' && (
@@ -1618,16 +1629,16 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               {complaintSuccess ? (
                 <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center', padding: '32px 16px' }}>
                   <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(16,163,127,0.1)', color: '#10a37f', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}><CheckCircle2 size={36} /></div>
-                  <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{t(language, 'complaintFiled')}</h3>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{t('complaintFiled')}</h3>
                   <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>BIS officials will review within 7-10 working days.</p>
                   <div style={{ background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 20, padding: '20px 32px', display: 'inline-block', textAlign: 'left', marginBottom: 28 }}>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 4 }}>{t(language, 'trackingId')}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 4 }}>{t('trackingId')}</div>
                     <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--accent)', letterSpacing: 2, marginBottom: 8 }}>{complaintSuccess.id}</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Filed on {complaintSuccess.date}</div>
                   </div>
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn btn-primary" onClick={() => { setActiveView('chat'); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>{t(language, 'trackTab')}</button>
-                    <button className="btn btn-ghost" onClick={() => setComplaintSuccess(null)}>{t(language, 'fileAnother')}</button>
+                    <button className="btn btn-primary" onClick={() => { setActiveView('chat'); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>{t('trackTab')}</button>
+                    <button className="btn btn-ghost" onClick={() => setComplaintSuccess(null)}>{t('fileAnother')}</button>
                   </div>
                 </motion.div>
               ) : (
@@ -1684,7 +1695,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                 ) : userComplaints.length === 0 ? (
                   <div className="card" style={{ textAlign: 'center', padding: '48px 24px', maxWidth: 680 }}>
                     <AlertCircle size={40} color="var(--text-muted)" style={{ marginBottom: 16 }} />
-                    <h3 style={{ color: 'var(--text-primary)', marginBottom: 8 }}>{t(language, 'noComplaintsYet')}</h3>
+                    <h3 style={{ color: 'var(--text-primary)', marginBottom: 8 }}>{t('noComplaintsYet')}</h3>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>Notice a counterfeit or non-compliant product? Let BIS know.</p>
                     <button className="btn btn-primary" onClick={() => setComplaintTab('file')}>File a Complaint →</button>
                   </div>
@@ -1738,22 +1749,22 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'community_labs' && communityTab === 'labs' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Building2 size={28} color="var(--accent)" /> {t(language, 'findLab')}</h2>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Building2 size={28} color="var(--accent)" /> {t('findLab')}</h2>
               
               <div style={{ display: 'flex', gap: 10, marginBottom: 20, background: 'var(--bg-glass-strong)', padding: 6, borderRadius: 14, width: 'fit-content' }}>
-                <button className={`btn ${(communityTab as string) === 'clubs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('clubs')} style={{ borderRadius: 10 }}>{t(language, 'standardsClubs')}</button>
-                <button className={`btn ${(communityTab as string) === 'labs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('labs')} style={{ borderRadius: 10 }}>{t(language, 'findLab')}</button>
+                <button className={`btn ${(communityTab as string) === 'clubs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('clubs')} style={{ borderRadius: 10 }}>{t('standardsClubs')}</button>
+                <button className={`btn ${(communityTab as string) === 'labs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('labs')} style={{ borderRadius: 10 }}>{t('findLab')}</button>
               </div>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'labsSubtitle')}</p>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('labsSubtitle')}</p>
             </div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
               <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
                 <MapPin size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input type="text" placeholder={t(language, 'filterState')} className="form-input" style={{ paddingLeft: 40, height: 44 }} value={labState} onChange={e => { setLabState(e.target.value); handleLabSearch(e.target.value, labProduct); }} />
+                <input type="text" placeholder={t('filterState')} className="form-input" style={{ paddingLeft: 40, height: 44 }} value={labState} onChange={e => { setLabState(e.target.value); handleLabSearch(e.target.value, labProduct); }} />
               </div>
               <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
                 <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input type="text" placeholder={t(language, 'filterProduct')} className="form-input" style={{ paddingLeft: 40, height: 44 }} value={labProduct} onChange={e => { setLabProduct(e.target.value); handleLabSearch(labState, e.target.value); }} />
+                <input type="text" placeholder={t('filterProduct')} className="form-input" style={{ paddingLeft: 40, height: 44 }} value={labProduct} onChange={e => { setLabProduct(e.target.value); handleLabSearch(labState, e.target.value); }} />
               </div>
             </div>
             {labSearch ? (
@@ -1787,17 +1798,17 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'community_labs' && communityTab === 'clubs' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 24 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Library size={28} color="var(--accent)" /> {t(language, 'standardsClubs')}</h2>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Library size={28} color="var(--accent)" /> {t('standardsClubs')}</h2>
               
               <div style={{ display: 'flex', gap: 10, marginBottom: 20, background: 'var(--bg-glass-strong)', padding: 6, borderRadius: 14, width: 'fit-content' }}>
-                <button className={`btn ${(communityTab as string) === 'clubs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('clubs')} style={{ borderRadius: 10 }}>{t(language, 'standardsClubs')}</button>
-                <button className={`btn ${(communityTab as string) === 'labs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('labs')} style={{ borderRadius: 10 }}>{t(language, 'findLab')}</button>
+                <button className={`btn ${(communityTab as string) === 'clubs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('clubs')} style={{ borderRadius: 10 }}>{t('standardsClubs')}</button>
+                <button className={`btn ${(communityTab as string) === 'labs' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setCommunityTab('labs')} style={{ borderRadius: 10 }}>{t('findLab')}</button>
               </div>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'clubsSubtitle')}</p>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('clubsSubtitle')}</p>
             </div>
             <div style={{ position: 'relative', maxWidth: 800, marginBottom: 24 }}>
               <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input type="text" placeholder={t(language, 'searchClubsPlaceholder')} className="form-input" style={{ paddingLeft: 48, height: 52 }} value={clubsSearch} onChange={e => setClubsSearch(e.target.value)} />
+              <input type="text" placeholder={t('searchClubsPlaceholder')} className="form-input" style={{ paddingLeft: 48, height: 52 }} value={clubsSearch} onChange={e => setClubsSearch(e.target.value)} />
             </div>
             {loadingClubs ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{[1,2,3].map(i => <div key={i} style={{ height: 130, borderRadius: 20, background: 'var(--bg-glass-strong)', opacity: 0.6 }} />)}</div>
@@ -1821,9 +1832,9 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                     </div>
                     <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: 12 }}>
                       {status === 'approved' ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#10a37f', fontWeight: 600, fontSize: '0.875rem' }}><CheckCircle2 size={16} /> {t(language, 'memberApproved')}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#10a37f', fontWeight: 600, fontSize: '0.875rem' }}><CheckCircle2 size={16} /> {t('memberApproved')}</div>
                       ) : status === 'pending' ? (
-                        <div style={{ color: '#f59e0b', fontWeight: 600, fontSize: '0.875rem' }}>⏳ {t(language, 'reqPending')}</div>
+                        <div style={{ color: '#f59e0b', fontWeight: 600, fontSize: '0.875rem' }}>⏳ {t('reqPending')}</div>
                       ) : status === 'rejected' ? (
                         <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.875rem' }}>❌ Request Rejected</div>
                       ) : (
@@ -1833,7 +1844,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                             if (res.ok || res.status === 400) { showToast('Join request sent! Pending admin approval.', 'success'); setClubsResults((prev: any[]) => prev.map((c: any) => c.id === club.id ? { ...c, __status: 'pending' } : c)); }
                             else { showToast('Failed to send request', 'error'); }
                           } catch { showToast('Network error', 'error'); }
-                        }}>{t(language, 'requestToJoin')}</button>
+                        }}>{t('requestToJoin')}</button>
                       )}
                     </div>
                   </div>
@@ -1848,8 +1859,8 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'faq' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 28 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><AlertCircle size={28} color="var(--accent)" /> {t(language, 'helpFaq')}</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'faqSubtitle')}</p>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><AlertCircle size={28} color="var(--accent)" /> {t('helpFaq')}</h2>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('faqSubtitle')}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 800, marginBottom: 32 }}>
               {[
@@ -1869,10 +1880,10 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               ))}
             </div>
             <div className="card" style={{ maxWidth: 800 }}>
-              <h3 style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: '1.05rem' }}>{t(language, 'stillQuestions')}</h3>
+              <h3 style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: '1.05rem' }}>{t('stillQuestions')}</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 18 }}>Use the AI chat for instant answers, or contact BIS directly.</p>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <button className="btn btn-primary" style={{ borderRadius: 'var(--radius-md)' }} onClick={() => { setActiveView('chat'); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>{t(language, 'askAi')}</button>
+                <button className="btn btn-primary" style={{ borderRadius: 'var(--radius-md)' }} onClick={() => { setActiveView('chat'); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>{t('askAi')}</button>
                 <a href="https://www.bis.gov.in/contact-us/" target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ borderRadius: 'var(--radius-md)', textDecoration: 'none', gap: 6 }}><ExternalLink size={14} /> BIS Contact</a>
                 <a href="tel:1800-11-4566" className="btn btn-ghost" style={{ borderRadius: 'var(--radius-md)', textDecoration: 'none' }}>📞 1800-11-4566</a>
               </div>
@@ -1884,8 +1895,8 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {activeView === 'about' && (
           <motion.div initial={{opacity: 0, y: 16}} animate={{opacity: 1, y: 0}} className="page-view">
             <div style={{ marginBottom: 28 }}>
-              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Info size={28} color="var(--accent)" /> {t(language, 'aboutBis')}</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{t(language, 'aboutSubtitle')}</p>
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><Info size={28} color="var(--accent)" /> {t('aboutBis')}</h2>
+              <p style={{ color: 'var(--text-secondary)' }}>{t('aboutSubtitle')}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 800 }}>
               {[
@@ -1982,12 +1993,12 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
           <div className="modal-backdrop">
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} transition={{ duration: 0.2 }} className="modal" style={{ maxWidth: 400 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}><Trash2 size={22} color="var(--danger)" /> {t(language, 'deleteAccount')}</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}><Trash2 size={22} color="var(--danger)" /> {t('deleteAccount')}</h2>
                 <button onClick={() => setShowDeleteAccountModal(false)} style={{ background: 'var(--bg-hover)', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}><X size={18} /></button>
               </div>
-              <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginBottom: 28 }}>{t(language, 'deleteAccountConfirm')}</p>
+              <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginBottom: 28 }}>{t('deleteAccountConfirm')}</p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setShowDeleteAccountModal(false)}>{t(language, 'cancel')}</button>
+                <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setShowDeleteAccountModal(false)}>{t('cancel')}</button>
                 <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, background: 'var(--danger)', color: 'white', fontWeight: 600 }} onClick={async () => { 
                   try {
                     await fetch('/api/auth?action=delete', { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
@@ -1995,7 +2006,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                   } catch (e) {
                     showToast('Failed to delete account', 'error');
                   }
-                }}>Yes, {t(language, 'deleteAccount')}</button>
+                }}>Yes, {t('deleteAccount')}</button>
               </div>
             </motion.div>
           </div>
@@ -2008,13 +2019,13 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
           <div className="modal-backdrop">
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} transition={{ duration: 0.2 }} className="modal" style={{ maxWidth: 400 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}><LogOut size={22} color="var(--danger)" /> {t(language, 'signOut')}</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}><LogOut size={22} color="var(--danger)" /> {t('signOut')}</h2>
                 <button onClick={() => setShowSignOutModal(false)} style={{ background: 'var(--bg-hover)', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}><X size={18} /></button>
               </div>
-              <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginBottom: 28 }}>{t(language, 'signOutConfirm')}</p>
+              <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginBottom: 28 }}>{t('signOutConfirm')}</p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setShowSignOutModal(false)}>{t(language, 'cancel')}</button>
-                <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, background: 'var(--danger)', color: 'white', fontWeight: 600 }} onClick={() => { logout(); navigate('/sign-in'); }}>{t(language, 'signOut')}</button>
+                <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setShowSignOutModal(false)}>{t('cancel')}</button>
+                <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, background: 'var(--danger)', color: 'white', fontWeight: 600 }} onClick={() => { logout(); navigate('/sign-in'); }}>{t('signOut')}</button>
               </div>
             </motion.div>
           </div>
@@ -2027,12 +2038,12 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
           <div className="modal-backdrop">
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} transition={{ duration: 0.2 }} className="modal" style={{ maxWidth: 400 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}><Trash2 size={22} color="var(--danger)" /> {t(language, 'deleteChat')}</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}><Trash2 size={22} color="var(--danger)" /> {t('deleteChat')}</h2>
                 <button onClick={() => setDeleteChatId(null)} style={{ background: 'var(--bg-hover)', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}><X size={18} /></button>
               </div>
               <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginBottom: 28 }}>Are you sure you want to delete this conversation? This action cannot be undone.</p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setDeleteChatId(null)}>{t(language, 'cancel')}</button>
+                <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setDeleteChatId(null)}>{t('cancel')}</button>
                 <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, background: 'var(--danger)', color: 'white', fontWeight: 600 }} onClick={async () => { 
                   try {
                     await fetch(`/api/conversations/${deleteChatId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
@@ -2062,7 +2073,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Edit3 size={22} color="var(--accent)" /> {t(language, 'renameChat')}
+                  <Edit3 size={22} color="var(--accent)" /> {t('renameChat')}
                 </h2>
                 <button onClick={() => setRenameChat(null)} style={{ background: 'var(--bg-hover)', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}>
                   <X size={18} />
@@ -2079,8 +2090,8 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                   style={{ marginBottom: 20 }}
                 />
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                  <button type="button" className="btn btn-ghost" onClick={() => setRenameChat(null)} style={{ padding: '0 20px', height: 44 }}>{t(language, 'cancel')}</button>
-                  <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', height: 44 }}>{t(language, 'save')}</button>
+                  <button type="button" className="btn btn-ghost" onClick={() => setRenameChat(null)} style={{ padding: '0 20px', height: 44 }}>{t('cancel')}</button>
+                  <button type="submit" className="btn btn-primary" style={{ padding: '0 24px', height: 44 }}>{t('save')}</button>
                 </div>
               </form>
             </motion.div>
