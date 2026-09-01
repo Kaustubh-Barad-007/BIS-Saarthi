@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 @import './mobile-tweaks.css';
 /* ============================================================
    BIS Assistant — Premium Design System v3
@@ -5,7 +6,7 @@
    ============================================================ */
 
 :root {
-  --bg-body:              #000000;
+    --bg-body:              #000000;
   --bg-glass:             #09090b;
   --bg-glass-strong:      #18181b;
   --bg-hover:             #27272a;
@@ -34,29 +35,29 @@
   --danger-muted:         rgba(239, 68, 68, 0.1);
   --warning:              #f59e0b;
   --info:                 #0ea5e9;
-  --shadow-xs:            0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --shadow-sm:            0 1px 3px 0 rgba(0, 0, 0, 0.6);
-  --shadow-md:            0 4px 6px -1px rgba(0, 0, 0, 0.6);
-  --shadow-lg:            0 10px 15px -3px rgba(0, 0, 0, 0.7);
-  --shadow-glass:         0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-accent:        0 4px 12px rgba(37, 99, 235, 0.2);
+  --shadow-xs:            0px 1px 2px 0px rgba(0,0,0,0.3);
+  --shadow-sm:            0px 1px 2px 0px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15);
+  --shadow-md:            0px 1px 3px 0px rgba(0,0,0,0.3), 0px 4px 8px 3px rgba(0,0,0,0.15);
+  --shadow-lg:            0px 2px 3px 0px rgba(0,0,0,0.3), 0px 6px 10px 4px rgba(0,0,0,0.15);
+  --shadow-glass:         0px 4px 4px 0px rgba(0,0,0,0.3), 0px 8px 12px 6px rgba(0,0,0,0.15);
+  --shadow-accent:        0 4px 12px rgba(168, 199, 250, 0.2);
   --blur-glass:           none;
-  --sidebar-width:        260px;
-  --topbar-height:        60px;
+  --sidebar-width:        280px;
+  --topbar-height:        64px;
   --radius-xs:            4px;
-  --radius-sm:            6px;
-  --radius-md:            8px;
-  --radius-lg:            10px;
-  --radius-xl:            12px;
-  --radius-2xl:           16px;
-  --logo-bg:              #2563eb;
-  --logo-color:           #ffffff;
-  --ease-out:             cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring:          cubic-bezier(0.34, 1.56, 0.64, 1);
+  --radius-sm:            8px;
+  --radius-md:            12px;
+  --radius-lg:            16px;
+  --radius-xl:            24px;
+  --radius-2xl:           28px;
+  --logo-bg:              #A8C7FA;
+  --logo-color:           #003355;
+  --ease-out:             cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring:          cubic-bezier(0.2, 0, 0, 1);
 }
 
 [data-theme="light"] {
-  --bg-body:              #F8FAFC;
+    --bg-body:              #F8FAFC;
   --bg-glass:             #FFFFFF;
   --bg-glass-strong:      #F1F5F9;
   --bg-hover:             #E2E8F0;
@@ -80,13 +81,13 @@
   --accent-hover:         #0369A1;
   --accent-muted:         rgba(0, 51, 102, 0.08);
   --accent-glow:          rgba(0, 51, 102, 0.15);
-  --shadow-xs:            0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm:            0 1px 3px 0 rgba(0, 0, 0, 0.08);
-  --shadow-md:            0 4px 6px -1px rgba(0, 0, 0, 0.08);
-  --shadow-lg:            0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-glass:         0 4px 20px rgba(0, 0, 0, 0.06);
-  --shadow-accent:        0 4px 12px rgba(0, 51, 102, 0.15);
-  --logo-bg:              #003366;
+  --shadow-xs:            0px 1px 2px 0px rgba(0,0,0,0.15);
+  --shadow-sm:            0px 1px 2px 0px rgba(0,0,0,0.15), 0px 2px 6px 2px rgba(0,0,0,0.05);
+  --shadow-md:            0px 1px 3px 0px rgba(0,0,0,0.15), 0px 4px 8px 3px rgba(0,0,0,0.05);
+  --shadow-lg:            0px 2px 3px 0px rgba(0,0,0,0.15), 0px 6px 10px 4px rgba(0,0,0,0.05);
+  --shadow-glass:         0px 4px 4px 0px rgba(0,0,0,0.15), 0px 8px 12px 6px rgba(0,0,0,0.05);
+  --shadow-accent:        0 4px 12px rgba(11, 87, 208, 0.15);
+  --logo-bg:              #0B57D0;
   --logo-color:           #FFFFFF;
 }
 
@@ -144,7 +145,7 @@
 html { font-size: 16px; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
   background: var(--bg-body);
   color: var(--text-primary);
   min-height: 100vh;
@@ -1216,3 +1217,58 @@ body {
 }
 
 
+
+
+/* Material Theme Overrides */
+.btn {
+  border-radius: 100px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.25px;
+  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), transform 0.1s;
+  border: none;
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn-primary {
+  background-color: var(--bg-button-primary);
+  color: var(--text-on-primary-btn);
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  box-shadow: var(--shadow-md);
+}
+.form-input, input, textarea, select {
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0 !important;
+  border: none !important;
+  border-bottom: 2px solid var(--border-input) !important;
+  background: var(--bg-glass-strong) !important;
+  padding: 12px 16px !important;
+  font-family: 'Roboto', sans-serif !important;
+}
+.form-input:focus, input:focus, textarea:focus, select:focus {
+  border-bottom-color: var(--accent) !important;
+  background: var(--bg-hover) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.panel, .card {
+  border: none !important;
+  box-shadow: var(--shadow-sm) !important;
+  background: var(--bg-glass) !important;
+  border-radius: var(--radius-lg) !important;
+}
+.msg-bubble {
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* FAQ Styles */
+.faq-details summary::-webkit-details-marker {
+  display: none;
+}
+.faq-details[open] .faq-icon {
+  transform: rotate(45deg);
+}

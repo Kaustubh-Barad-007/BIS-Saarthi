@@ -372,10 +372,14 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
     const fetchClubs = async () => {
       setLoadingClubs(true);
       try {
-        const res = await fetch(`/api/clubs?q=${encodeURIComponent(clubsSearch)}`);
+        const headers: any = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(`/api/clubs?q=${encodeURIComponent(clubsSearch)}`, { headers });
         if (res.ok) {
           const data = await res.json();
-          setClubsResults(data.clubs);
+          const reqs = data.userRequests || [];
+          const reqMap = reqs.reduce((acc: any, req: any) => { acc[req.clubId] = req.status; return acc; }, {});
+          setClubsResults(data.clubs.map((c: any) => ({ ...c, __status: reqMap[c.id] })));
         }
       } catch {} finally { setLoadingClubs(false); }
     };
@@ -406,12 +410,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         .then(res => res.json())
         .then(data => {
           if (data.labs) {
-            setLabResults(data.labs.map((l: any) => ({
-              name: l.name,
-              location: l.location,
-              cert: l.nabl ? 'NABL Accredited' : 'BIS Recognized',
-              approved: l.bis
-            })));
+            setLabResults(data.labs);
           }
         })
         .catch(() => {});
@@ -559,7 +558,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
       const res = await fetch(`/api/labs?product=${encodeURIComponent(product)}&state=${encodeURIComponent(state)}`);
       if (res.ok) {
         const data = await res.json();
-        setLabResults(data.labs.map((l: any) => ({ name: l.name, location: l.location, cert: l.nabl ? 'NABL Accredited' : 'BIS Recognized', approved: l.bis })));
+        setLabResults(data.labs);
       }
     } catch {} finally {
       setLabSearch(false);
@@ -1862,23 +1861,31 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}><AlertCircle size={28} color="var(--accent)" /> {t('helpFaq')}</h2>
               <p style={{ color: 'var(--text-secondary)' }}>{t('faqSubtitle')}</p>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 800, marginBottom: 32 }}>
-              {[
-                { q: 'How do I apply for a BIS ISI license?', a: 'Apply through the Manak Online portal at services.bis.gov.in. Submit product test reports from a BIS-recognized lab, factory details, and pay the fee. Process takes 60-90 days.' },
-                { q: 'Which products require mandatory ISI certification?', a: 'Over 370+ products including steel, cement, packaged drinking water, LPG cylinders, electrical wires, helmets, and children toys. Ask the AI chat for your specific product.' },
-                { q: 'How do I verify an ISI mark or gold hallmark?', a: 'Use the Verify ISI/HUID tool in the sidebar. For HUID enter the 6-character code, for ISI enter the CM/L number. You can also verify at bis.gov.in.' },
-                { q: 'What is gold hallmarking and why is it mandatory?', a: 'BIS Hallmarking certifies gold purity. Since January 2021 it is mandatory. Each piece has a unique 6-character HUID traceable to the jeweller and assay centre.' },
-                { q: 'How long does a complaint take to resolve?', a: 'Normal priority: 7-10 working days. High/urgent (safety risk): escalated within 24-48 hours. Track progress using your complaint Tracking ID.' },
-                { q: 'What is the fee structure for BIS certification?', a: 'Fees vary by scheme and company turnover. MSMEs get concessions. Annual license fees range from Rs.1,000 to Rs.5 lakhs. Use the Fee Estimator in the sidebar.' },
-                { q: 'What is CRS (Compulsory Registration Scheme)?', a: 'CRS covers electronics like mobiles, laptops, power banks, and LED lights. Unlike ISI it requires self-declaration and registration — no factory inspection for most products.' },
-                { q: 'How do I join a BIS Standards Club?', a: 'Use the Standards Clubs section in the sidebar to find and request membership. Membership is free for students and requires admin approval within 3-5 working days.' },
-              ].map((item, i) => (
-                <details key={i} style={{ background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 16, padding: '14px 18px', cursor: 'pointer' }}>
-                  <summary style={{ fontWeight: 600, color: 'var(--text-primary)', outline: 'none' }}>{item.q}</summary>
-                  <p style={{ marginTop: 10, color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>{item.a}</p>
-                </details>
-              ))}
-            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 800, marginBottom: 32 }}>
+                {(userRole === 'manufacturer' ? [
+                  { q: 'How do I apply for a BIS ISI license?', a: 'Apply through the Manak Online portal at services.bis.gov.in. Submit product test reports from a BIS-recognized lab, factory details, and pay the fee. Process takes 60-90 days.' },
+                  { q: 'Which products require mandatory ISI certification?', a: 'Over 370+ products including steel, cement, packaged drinking water, LPG cylinders, electrical wires, helmets, and children toys. Ask the AI chat for your specific product.' },
+                  { q: 'What is the fee structure for BIS certification?', a: 'Fees vary by scheme and company turnover. MSMEs get concessions. Annual license fees range from Rs.1,000 to Rs.5 lakhs. Use the Fee Estimator in the sidebar.' },
+                  { q: 'What is CRS (Compulsory Registration Scheme)?', a: 'CRS covers electronics like mobiles, laptops, power banks, and LED lights. Unlike ISI it requires self-declaration and registration - no factory inspection for most products.' },
+                  { q: 'How often do BIS officials inspect manufacturing units?', a: 'Under regular surveillance, BIS officials inspect units at least once a year. High-risk products may have more frequent surprise inspections.' },
+                  { q: 'How do I renew my expired ISI License?', a: 'Renewal applications must be submitted via the Manak Online portal at least one month before expiration, along with the production details and renewal fee.' }
+                ] : [
+                  { q: 'How do I verify an ISI mark or gold hallmark?', a: 'Use the Verify ISI/HUID tool in the sidebar. For HUID enter the 6-character code, for ISI enter the CM/L number. You can also verify at bis.gov.in.' },
+                  { q: 'What is gold hallmarking and why is it mandatory?', a: 'BIS Hallmarking certifies gold purity. Since January 2021 it is mandatory. Each piece has a unique 6-character HUID traceable to the jeweller and assay centre.' },
+                  { q: 'How do I file a complaint about poor quality products?', a: 'Navigate to the Complaints section in the sidebar. You can file a detailed report, which is assigned a Tracking ID for BIS officials to review.' },
+                  { q: 'How long does a complaint take to resolve?', a: 'Normal priority: 7-10 working days. High/urgent (safety risk): escalated within 24-48 hours. Track progress using your complaint Tracking ID.' },
+                  { q: 'How do I join a BIS Standards Club?', a: 'Use the Community & Labs section in the sidebar to find and request membership. Membership is free for students and requires admin approval within 3-5 working days.' },
+                  { q: 'What should I do if a retailer refuses to give a bill for hallmarked gold?', a: 'A proper GST bill with the HUID details is mandatory. You should immediately report the jeweller through the Complaints Hub.' }
+                ]).map((item, i) => (
+                  <details key={i} className="faq-details" style={{ background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 16, padding: '16px 20px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <summary style={{ fontWeight: 600, color: 'var(--text-primary)', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      {item.q}
+                      <span className="faq-icon" style={{ color: 'var(--accent)', fontSize: '1.2rem', transition: 'transform 0.2s' }}>+</span>
+                    </summary>
+                    <p style={{ marginTop: 14, color: 'var(--text-secondary)', fontSize: '0.9375rem', lineHeight: 1.6, paddingBottom: 4 }}>{item.a}</p>
+                  </details>
+                ))}
+              </div>
             <div className="card" style={{ maxWidth: 800 }}>
               <h3 style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: '1.05rem' }}>{t('stillQuestions')}</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 18 }}>Use the AI chat for instant answers, or contact BIS directly.</p>

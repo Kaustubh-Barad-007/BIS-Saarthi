@@ -25,10 +25,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ];
       }
 
+      
       let labs = await prisma.laboratory.findMany({
         where,
         orderBy: { name: "asc" },
       });
+
+      if (labs.length === 0) {
+        const LABS_SEED = [
+          { name: "National Test House", location: "Mumbai", state: "Maharashtra", address: "MIDC Andheri East", products: ["Electrical", "Electronics", "Toys"], nabl: true, bis: true, email: "nth-mumbai@nic.in" },
+          { name: "ERDA Vadodara", location: "Vadodara", state: "Gujarat", address: "Makarpura Industrial Estate", products: ["Transformers", "Cables", "Switchgears"], nabl: true, bis: true, email: "erda@erda.org" },
+          { name: "CPRI Bangalore", location: "Bangalore", state: "Karnataka", address: "Prof. Sir CV Raman Road", products: ["High Voltage", "Power Systems", "Meters"], nabl: true, bis: true, email: "info@cpri.in" },
+          { name: "Shriram Institute", location: "New Delhi", state: "Delhi", address: "19 University Road", products: ["Chemicals", "Plastics", "Water"], nabl: true, bis: true, email: "sri@shriraminstitute.org" },
+          { name: "TUV Rheinland India", location: "Pune", state: "Maharashtra", address: "Chakan Industrial Area", products: ["Automotive", "Machinery", "Toys"], nabl: true, bis: true, email: "info@ind.tuv.com" }
+        ];
+        await prisma.laboratory.createMany({ data: LABS_SEED, skipDuplicates: true });
+        labs = await prisma.laboratory.findMany({ where, orderBy: { name: "asc" } });
+      }
+
 
       if (product && typeof product === "string" && product.length > 1) {
         const pLower = product.toLowerCase();

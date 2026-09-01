@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-for-demo";
 
 const CLUBS = [
   { id: "1", name: "Delhi Public School, R.K. Puram", city: "New Delhi", state: "Delhi", members: 45, type: "School", established: "2019", contact: "principal@dpsrkp.net" },
@@ -17,6 +17,11 @@ const CLUBS = [
 ];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  if (req.method === "OPTIONS") return res.status(200).end();
+
   if (req.method === "GET") {
     const { q } = req.query;
     const where: any = {};
@@ -27,18 +32,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         { state: { contains: q, mode: "insensitive" } },
       ];
     }
-    const clubs = await prisma.standardClub.findMany({
+    
+    let clubs = await prisma.standardClub.findMany({
       where,
       orderBy: { name: "asc" },
     });
+    
+    if (clubs.length === 0) {
+      const CLUBS_SEED = [
+        { name: "Delhi Public School, R.K. Puram", city: "New Delhi", state: "Delhi", members: 45, type: "School", established: "2019", contact: "principal@dpsrkp.net" },
+        { name: "Kendriya Vidyalaya, IIT Powai", city: "Mumbai", state: "Maharashtra", members: 32, type: "School", established: "2020", contact: "kvpowai@kendriyavidyalaya.in" },
+        { name: "St. Xavier's College", city: "Kolkata", state: "West Bengal", members: 120, type: "College", established: "2018", contact: "standards@sxccal.edu" },
+        { name: "Delhi Technological University", city: "New Delhi", state: "Delhi", members: 85, type: "University", established: "2017", contact: "standards@dtu.ac.in" },
+        { name: "National Institute of Technology", city: "Trichy", state: "Tamil Nadu", members: 60, type: "University", established: "2019", contact: "standards@nitt.edu" },
+        { name: "Sardar Patel Vidyalaya", city: "New Delhi", state: "Delhi", members: 28, type: "School", established: "2021", contact: "info@spvidyalaya.in" }
+      ];
+      await prisma.standardClub.createMany({ data: CLUBS_SEED, skipDuplicates: true });
+      clubs = await prisma.standardClub.findMany({ where, orderBy: { name: "asc" } });
+    }
+
 
     // If user is logged in, attach their join requests
     const token = req.headers.authorization?.split(" ")[1];
     let userRequests: any[] = [];
     if (token) {
       try {
+        
         const decoded = jwt.verify(token, JWT_SECRET) as any;
-        userRequests = await prisma.clubJoinRequest.findMany({ where: { userId: decoded.userId } });
+        if (decoded.role === "admin") {
+          userRequests = await prisma.clubJoinRequest.findMany({
+            orderBy: { createdAt: "desc" },
+            include: { user: { select: { name: true, email: true } } }
+          });
+        } else {
+          userRequests = await prisma.clubJoinRequest.findMany({ where: { userId: decoded.userId } });
+        }
+
       } catch {}
     }
     return res.status(200).json({ clubs, userRequests });
@@ -49,7 +78,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!token) return res.status(401).json({ error: "Unauthorized" });
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
-      const { clubId, clubName } = req.body;
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      const { clubId, clubName } = body;
       if (!clubId) return res.status(400).json({ error: "Missing clubId" });
       // Check if already requested
       const existing = await prisma.clubJoinRequest.findFirst({ where: { userId: decoded.userId, clubId } });
@@ -69,8 +99,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!token) return res.status(401).json({ error: "Unauthorized" });
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
-      const targetId = req.body.id || req.body.requestId;
-      const { status } = req.body;
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      const targetId = body.id || body.requestId;
+      const { status } = body;
       if (!targetId) return res.status(400).json({ error: "Missing request id" });
       const updated = await prisma.clubJoinRequest.update({ where: { id: targetId }, data: { status } });
       return res.status(200).json(updated);
