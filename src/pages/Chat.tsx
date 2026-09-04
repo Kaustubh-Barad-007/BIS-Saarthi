@@ -986,8 +986,8 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
       {/* Main */}
       <div className="main-area">
         {/* Top Bar */}
-        <div className="topbar" style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className="topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {!sidebarOpen && (
               <button className="icon-btn" onClick={() => setSidebarOpen(true)} style={{ background: 'var(--bg-glass-strong)' }} title="Open sidebar">
                 <PanelLeftOpen size={18} />
@@ -1083,8 +1083,9 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
+                    className="notif-panel"
                     style={{
-                      position: 'absolute', right: 0, top: 48, width: 340, maxHeight: 460,
+                      position: 'absolute', right: 0, top: 48, width: 'min(340px, calc(100vw - 16px))', maxHeight: 460,
                       background: 'var(--bg-modal)', border: '1px solid var(--border-glass)',
                       borderRadius: 16, boxShadow: 'var(--shadow-glass)', zIndex: 1000,
                       display: 'flex', flexDirection: 'column', overflow: 'hidden'

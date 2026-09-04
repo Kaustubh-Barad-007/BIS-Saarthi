@@ -51,7 +51,7 @@ export default function Home() {
             Find, understand and explore BIS standards, documents and certification information with a modern intelligent assistant.
           </p>
 
-          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 54 }}>
+          <div className="landing-cta-row" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 54 }}>
             <motion.button whileHover={{ y: -2 }} whileTap={{ y: 1 }} onClick={() => navigate("/sign-in")} className="btn btn-primary btn-lg" style={{ borderRadius: 'var(--radius-md)' }}>Get Started <ArrowRight size={16} /></motion.button>
             <motion.button whileHover={{ y: -2 }} whileTap={{ y: 1 }} onClick={() => navigate("/sign-in")} className="btn btn-white btn-lg" style={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass)' }}>Sign In</motion.button>
           </div>

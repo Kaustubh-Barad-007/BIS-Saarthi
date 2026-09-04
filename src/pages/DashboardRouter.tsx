@@ -66,7 +66,7 @@ export default function DashboardRouter() {
       </AnimatePresence>
 
       {/* Mobile Topbar */}
-      <div className="topbar" style={{ display: 'none', position: 'fixed', top: 0, left: 0, right: 0, height: 60, background: 'var(--bg-glass-strong)', backdropFilter: 'none', borderBottom: '1px solid var(--border-glass)', zIndex: 40, alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
+      <div className="topbar mobile-only" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 60, background: 'var(--bg-glass-strong)', borderBottom: '1px solid var(--border-glass)', zIndex: 40, alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo size={20} />
           <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t('admin')}</span>
@@ -77,11 +77,12 @@ export default function DashboardRouter() {
       </div>
 
       <style>{`
+        .mobile-only { display: none !important; }
         @media (max-width: 768px) {
-          .topbar.mobile-only { display: flex !important; }
-          .sidebar.desktop-only { display: none !important; }
+          .mobile-only { display: flex !important; }
+          .desktop-only { display: none !important; }
           .admin-desktop-topbar { display: none !important; }
-          .main-area { margin-top: 60px; height: calc(100vh - 60px) !important; }
+          .main-area { margin-top: 60px; height: calc(100dvh - 60px) !important; overflow-y: auto; }
         }
       `}</style>
 

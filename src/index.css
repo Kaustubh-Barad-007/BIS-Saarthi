@@ -998,7 +998,7 @@ body {
   .suggestion-grid { grid-template-columns: 1fr; gap: 8px; }
   .features-grid { grid-template-columns: 1fr; }
   .landing-nav { padding: 0 16px; }
-  .page-view { padding: 18px 14px; }
+  .page-view { padding: 16px 12px; }
   .auth-card { padding: 28px 18px; }
   .chat-content { padding: 16px 12px 8px; }
   .input-area {
@@ -1009,6 +1009,10 @@ body {
     padding: 0 12px;
     height: auto;
     min-height: 56px;
+    display: flex;
+  }
+  .panel {
+    padding: 20px 16px;
   }
   /* Prevent iOS zoom on form inputs */
   input, textarea, select, .form-input {
@@ -1018,24 +1022,75 @@ body {
   .btn, .icon-btn, .sidebar-item, .tab {
     min-height: 40px;
   }
+  /* Notification panel: never overflow screen */
+  .notif-panel {
+    right: 0 !important;
+    width: min(340px, calc(100vw - 16px)) !important;
+  }
+  /* Landing section padding */
+  section {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  /* View card padding */
+  .view-card {
+    padding: 16px;
+  }
 }
+
 
 @media (max-width: 480px) {
   .landing-hero { padding: 84px 14px 40px; }
   .modal {
     padding: 20px 16px;
     border-radius: var(--radius-lg);
-    width: 95vw;
+    width: 96vw;
   }
   .topbar {
     padding: 8px 10px;
-    gap: 8px;
+    gap: 6px;
   }
   .app-layout {
     height: 100vh;
     height: 100dvh;
   }
+  /* On very small screens the notification dropdown should be full-width from right edge */
+  .notif-panel {
+    right: -4px !important;
+    width: calc(100vw - 16px) !important;
+    max-width: 340px !important;
+  }
+  /* Chat: reduce message bubble max-width to avoid overflow */
+  .msg-bubble.user {
+    max-width: 85vw;
+  }
+  /* Panel padding: tighten on small screens */
+  .panel {
+    padding: 18px 14px !important;
+  }
+  /* Page view on small phones */
+  .page-view {
+    padding: 14px 10px !important;
+  }
+  /* Suggestion grid: single column */
+  .suggestion-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Landing buttons: stack vertically */
+  .landing-cta-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .landing-cta-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  /* Footer: compact */
+  footer {
+    padding: 20px 16px !important;
+  }
 }
+
 
 /* Toast notification */
 .toast {
@@ -1351,7 +1406,7 @@ body {
 
 
 
-/* Material Theme Overrides */
+/* Design System Overrides */
 .btn {
   border-radius: 100px;
   font-weight: 500;
@@ -1373,28 +1428,28 @@ body {
   box-shadow: var(--shadow-md);
 }
 .form-input, input, textarea, select {
-  border-radius: var(--radius-xs) var(--radius-xs) 0 0 !important;
-  border: none !important;
-  border-bottom: 2px solid var(--border-input) !important;
-  background: var(--bg-glass-strong) !important;
-  padding: 12px 16px !important;
-  font-family: 'Roboto', sans-serif !important;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-input);
+  background: var(--bg-glass-strong);
+  padding: 12px 16px;
+  font-family: 'Roboto', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 .form-input:focus, input:focus, textarea:focus, select:focus {
-  border-bottom-color: var(--accent) !important;
-  background: var(--bg-hover) !important;
-  box-shadow: none !important;
-  outline: none !important;
+  border-color: var(--accent);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  outline: none;
 }
 .panel, .card {
-  border: none !important;
-  box-shadow: var(--shadow-sm) !important;
-  background: var(--bg-glass) !important;
-  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-glass);
+  border-radius: var(--radius-lg);
 }
 .msg-bubble {
-  border-radius: var(--radius-xl) !important;
-  box-shadow: var(--shadow-sm) !important;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
 }
 
 /* FAQ Styles */

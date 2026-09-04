@@ -304,7 +304,7 @@ export function ComplaintsHub({ setActiveView }: { setActiveView: (v: string) =>
       </div>
 
       {/* Main Tab Bar */}
-      <div className="tab-container" style={{ marginBottom: 28, maxWidth: 420 }}>
+      <div className="tab-container" style={{ marginBottom: 28 }}>
         <button 
           type="button" 
           className={`tab ${complaintTab === 'file' ? 'active' : ''}`} 
@@ -336,7 +336,7 @@ export function ComplaintsHub({ setActiveView }: { setActiveView: (v: string) =>
 
       {/* VIEW 1: FILE GRIEVANCE */}
       {complaintTab === 'file' && (
-        <div className="panel" style={{ maxWidth: 840, padding: '32px 28px', borderRadius: 20, boxShadow: 'var(--shadow-md)' }}>
+        <div className="panel" style={{ maxWidth: 840 }}>
           {complaintSuccess ? (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center', padding: '30px 10px' }}>
               <div style={{ 
@@ -526,7 +526,7 @@ export function ComplaintsHub({ setActiveView }: { setActiveView: (v: string) =>
       {complaintTab === 'track' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Search & Instant Lookup Bar */}
-          <div className="panel" style={{ padding: '20px 24px', borderRadius: 20, boxShadow: 'var(--shadow-sm)' }}>
+          <div className="panel">
             <form onSubmit={handleSearch} style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ position: 'relative', flex: '1 1 300px' }}>
                 <Search size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
