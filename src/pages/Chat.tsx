@@ -1083,7 +1083,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               >
                 <Bell size={18} />
                 {unreadNotifCount > 0 && (
-                  <span style={{
+                  <span className="notif-badge" style={{
                     position: 'absolute', top: 7, right: 7, width: 8, height: 8,
                     borderRadius: '50%', background: '#ef4444',
                     boxShadow: '0 0 8px #ef4444'

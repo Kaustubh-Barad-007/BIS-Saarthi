@@ -150,8 +150,15 @@ export function CommunityLabs({ setActiveView, viewParams = {} }: { setActiveVie
             <div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>{labResults.length} Recognized Labs Found</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-                {labResults.map((lab: any) => (
-                  <div key={lab.id} className="panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                {labResults.map((lab: any, index: number) => (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.25, delay: index * 0.05, ease: [0.2, 0.8, 0.2, 1] }}
+                    key={lab.id} 
+                    className="panel" 
+                    style={{ padding: 20, display: 'flex', flexDirection: 'column', height: '100%' }}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                       <span className="pill pill-blue" style={{ fontSize: '0.7rem' }}>OSL ID: {lab.id}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#f59e0b', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -171,7 +178,7 @@ export function CommunityLabs({ setActiveView, viewParams = {} }: { setActiveVie
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -192,8 +199,15 @@ export function CommunityLabs({ setActiveView, viewParams = {} }: { setActiveVie
             <div className="panel" style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>No Standards Clubs found.</div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-              {clubsResults.map(club => (
-                <div key={club.id} className="panel" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+              {clubsResults.map((club, index) => (
+                <motion.div 
+                  initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.25, delay: index * 0.05, ease: [0.2, 0.8, 0.2, 1] }}
+                  key={club.id} 
+                  className="panel" 
+                  style={{ padding: 24, display: 'flex', flexDirection: 'column' }}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                     <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Users size={24} color="#3b82f6" />
@@ -219,7 +233,7 @@ export function CommunityLabs({ setActiveView, viewParams = {} }: { setActiveVie
                       Join Club
                     </button>
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
           )}

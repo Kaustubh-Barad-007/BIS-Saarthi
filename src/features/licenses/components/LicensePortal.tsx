@@ -102,8 +102,14 @@ export function LicensePortal({
                 </tr>
               </thead>
               <tbody>
-                {userLicenses.map((lic: any) => (
-                  <tr key={lic.id} style={{ borderBottom: '1px solid var(--border-glass)' }}>
+                {userLicenses.map((lic: any, index: number) => (
+                  <motion.tr 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.05, ease: 'easeOut' }}
+                    key={lic.id} 
+                    style={{ borderBottom: '1px solid var(--border-glass)' }}
+                  >
                     <td style={{ padding: '16px 20px', fontWeight: 600, color: 'var(--text-primary)' }}>
                       {lic.licenseNo || `APP-${lic.id.slice(0, 8).toUpperCase()}`}
                     </td>
@@ -121,7 +127,7 @@ export function LicensePortal({
                         {lic.status === 'active' ? 'Active' : lic.status === 'approved' ? 'Approved' : lic.status === 'under_review' ? 'Under Review' : lic.status === 'rejected' ? 'Rejected' : 'Pending'}
                       </span>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
