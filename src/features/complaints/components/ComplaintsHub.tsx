@@ -38,12 +38,19 @@ interface ComplaintItem {
   user?: { name: string; email: string };
 }
 
-export function ComplaintsHub({ setActiveView }: { setActiveView: (v: string) => void }) {
+export function ComplaintsHub({ setActiveView, viewParams = {} }: { setActiveView: (v: string) => void, viewParams?: any }) {
   const { t } = useLanguage();
   const { token } = useAuth();
   
   // Tabs & Views
-  const [complaintTab, setComplaintTab] = useState<'file' | 'track'>('file');
+  const [complaintTab, setComplaintTab] = useState<'file' | 'track'>(viewParams?.defaultTab || 'file');
+
+  useEffect(() => {
+    if (viewParams?.defaultTab) {
+      setComplaintTab(viewParams.defaultTab);
+    }
+  }, [viewParams]);
+  
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'in-progress' | 'resolved'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSearchTerm, setActiveSearchTerm] = useState('');

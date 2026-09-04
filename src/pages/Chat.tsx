@@ -277,6 +277,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
     }
   };
   const [activeView, setActiveView] = useState<'chat' | 'standards' | 'calculator' | 'verify' | 'complaint' | 'track' | 'lab' | 'guide' | 'clubs' | 'faq' | 'about' | 'vault' | 'licenses' | 'apply_license' | 'complaints_hub' | 'community_labs' | 'radar'>('chat');
+  const [viewParams, setViewParams] = useState<any>({});
   
   
   
@@ -345,36 +346,45 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
 
   const handleNotificationClick = async (notif: any) => {
     try {
-      await fetch('/api/sync?type=notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ id: notif.id })
-      });
-      setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
-      setUnreadNotifCount(prev => Math.max(0, prev - 1));
-    } catch {}
+    await fetch('/api/sync?type=notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ id: notif.id })
+    });
+    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+    setUnreadNotifCount(prev => Math.max(0, prev - 1));
 
     setShowNotifCenter(false);
 
+    let targetView = 'chat';
+    let params: any = {};
+
     const text = `${notif.title || ''} ${notif.message || ''} ${notif.type || ''}`.toLowerCase();
-    if (text.includes('complaint') || text.includes('grievance') || text.includes('ticket')) {
-      setActiveView('complaints_hub' as any);
-      showToast('Redirected to Complaints Hub');
+    
+    if (text.includes('complaint') || text.includes('grievance') || text.includes('ticket') || notif.type === 'STATUS_UPDATE') {
+      targetView = 'complaints_hub';
+      params = { defaultTab: 'track' };
     } else if (text.includes('license') || text.includes('cm/l') || text.includes('application')) {
-      setActiveView('licenses' as any);
-      showToast('Redirected to License Portal');
+      targetView = 'licenses';
     } else if (text.includes('radar') || text.includes('qco') || text.includes('standard') || notif.type === 'RADAR_ALERT') {
-      setActiveView('radar' as any);
-      showToast('Redirected to Compliance Radar');
-    } else if (text.includes('club') || text.includes('lab') || text.includes('testing')) {
-      setActiveView('community_labs' as any);
-      showToast('Redirected to Community & Labs');
+      targetView = 'radar';
+    } else if (text.includes('club') || notif.type === 'CLUB_UPDATE') {
+      targetView = 'community_labs';
+      params = { defaultTab: 'clubs' };
+    } else if (text.includes('lab') || text.includes('testing')) {
+      targetView = 'community_labs';
+      params = { defaultTab: 'labs' };
     } else if (text.includes('isi') || text.includes('hallmark') || text.includes('verify')) {
-      setActiveView('verify' as any);
-      showToast('Redirected to ISI Verifier');
+      targetView = 'verify';
     } else {
       setSelectedNotifDetail(notif);
+      return;
     }
+
+    setActiveView(targetView as any);
+    setViewParams(params);
+    showToast(`Redirected to ${targetView.replace('_', ' ')}`);
+  } catch {}
   };
 
   const markAllNotificationsAsRead = async () => {
@@ -1441,12 +1451,12 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
           <FeeEstimator setActiveView={setActiveView as any} />
         )}
         {activeView === 'complaints_hub' && (
-          <ComplaintsHub setActiveView={setActiveView as any} />
+          <ComplaintsHub setActiveView={setActiveView as any} viewParams={viewParams} />
         )}
         {activeView === 'verify' && (
           <LicenseVerifier setActiveView={setActiveView as any} setSidebarOpen={setSidebarOpen} />
         )}
-        {activeView === 'community_labs' && <CommunityLabs setActiveView={setActiveView as any} />}
+        {activeView === 'community_labs' && <CommunityLabs setActiveView={setActiveView as any} viewParams={viewParams} />}
         {activeView === 'faq' && <FAQ setActiveView={setActiveView as any} />}
         {activeView === 'about' && <AboutBIS setActiveView={setActiveView as any} />}
         {/* ===== DOCUMENT VAULT ===== */}

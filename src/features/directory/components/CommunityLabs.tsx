@@ -4,7 +4,7 @@ import { ArrowLeft, Layers, Users, Beaker, MapPin, Search, Star, CheckCircle, X 
 import { useLanguage } from '@/app/providers/LanguageContext';
 import { useAuth } from '@/app/providers/AuthContext';
 
-export function CommunityLabs({ setActiveView }: { setActiveView: (v: string) => void }) {
+export function CommunityLabs({ setActiveView, viewParams = {} }: { setActiveView: (v: string) => void, viewParams?: any }) {
   const { t } = useLanguage();
   const { token } = useAuth();
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -14,7 +14,13 @@ export function CommunityLabs({ setActiveView }: { setActiveView: (v: string) =>
     setTimeout(() => setToast(null), 4000);
   };
 
-  const [communityTab, setCommunityTab] = useState<'clubs' | 'labs'>('clubs');
+  const [communityTab, setCommunityTab] = useState<'clubs' | 'labs'>(viewParams?.defaultTab || 'clubs');
+
+  useEffect(() => {
+    if (viewParams?.defaultTab) {
+      setCommunityTab(viewParams.defaultTab);
+    }
+  }, [viewParams]);
   const [labSearch, setLabSearch] = useState(false);
   const [labResults, setLabResults] = useState<any[] | null>(null);
   const [labState, setLabState] = useState('');
