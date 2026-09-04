@@ -577,7 +577,10 @@ body {
   position: relative;
   box-shadow: var(--shadow-sm);
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab {
@@ -597,6 +600,8 @@ body {
   font-family: inherit;
   outline: none;
   box-sizing: border-box;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab:hover:not(.active) {
@@ -715,13 +720,14 @@ body {
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
   padding: 24px;
-  width: 100%;
-  max-width: 480px;
+  width: 94vw;
+  max-width: 520px;
   box-shadow: var(--shadow-lg);
   position: relative;
-  overflow: hidden;
-  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 32px);
+  max-height: calc(100vh - 32px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .suggestion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
@@ -840,25 +846,28 @@ body {
 
 .auth-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 84px 16px 40px;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .auth-card {
   background: var(--bg-glass-strong);
-  
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
   padding: 36px 32px;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  margin: auto 0;
 }
 
 .divider { height: 1px; background: var(--border-glass); margin: 16px 0; }
@@ -918,42 +927,114 @@ body {
 .role-manufacturer{ color: #6366f1; }
 .role-admin       { color: #f59e0b; }
 
-@media (max-width: 768px) {
-  .sidebar { position: absolute; z-index: 50; height: 100%; }
-  .suggestion-grid { grid-template-columns: 1fr; }
-  .features-grid { grid-template-columns: 1fr; }
-  .hide-mobile { display: none !important; }
-  .landing-nav { padding: 0 16px; }
-  .page-view { padding: 20px 16px; }
-  .auth-card { padding: 28px 20px; }
+/* Table Responsive Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 480px) {
-  .landing-hero { padding: 90px 16px 40px; }
-  .modal { padding: 22px 18px; border-radius: var(--radius-xl); }
+/* Landing Page Responsive Stats Grid */
+.landing-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
-/* ============================================================
-   Chat Page — Mobile & Micro-interaction improvements
-   ============================================================ */
+.landing-stat-item {
+  text-align: center;
+  padding: 16px 24px;
+  border-right: 1px solid var(--border-glass);
+}
 
-/* Mobile sidebar slide-in */
+.landing-stat-item:last-child {
+  border-right: none;
+}
+
+@media (max-width: 680px) {
+  .landing-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing-stat-item:nth-child(2) {
+    border-right: none;
+  }
+  .landing-stat-item:nth-child(1),
+  .landing-stat-item:nth-child(2) {
+    border-bottom: 1px solid var(--border-glass);
+  }
+}
+
+@media (max-width: 380px) {
+  .landing-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .landing-stat-item {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-glass);
+    padding: 12px 16px;
+  }
+  .landing-stat-item:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Universal Mobile & Tablet Optimizations */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed !important;
     left: 0; top: 0; bottom: 0;
+    height: 100vh !important;
+    height: 100dvh !important;
     z-index: 50;
     width: 280px !important;
-    box-shadow: 4px 0 40px rgba(0,0,0,0.5);
+    box-shadow: 4px 0 40px rgba(0,0,0,0.6);
   }
-  .chat-content { padding: 16px 12px 8px; }
-  .input-area { padding: 6px 12px 16px; }
-  .chat-input-box { font-size: 16px; /* prevent iOS zoom */ }
-  .topbar { padding: 0 12px; }
-
-  .suggestion-grid { grid-template-columns: 1fr; gap: 6px; }
-  .page-view { padding: 16px 12px; }
   .hide-mobile { display: none !important; }
+  .suggestion-grid { grid-template-columns: 1fr; gap: 8px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .landing-nav { padding: 0 16px; }
+  .page-view { padding: 18px 14px; }
+  .auth-card { padding: 28px 18px; }
+  .chat-content { padding: 16px 12px 8px; }
+  .input-area {
+    padding: 8px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+  }
+  .topbar {
+    padding: 0 12px;
+    height: auto;
+    min-height: 56px;
+  }
+  /* Prevent iOS zoom on form inputs */
+  input, textarea, select, .form-input {
+    font-size: 16px !important;
+  }
+  /* Accessible touch targets */
+  .btn, .icon-btn, .sidebar-item, .tab {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-hero { padding: 84px 14px 40px; }
+  .modal {
+    padding: 20px 16px;
+    border-radius: var(--radius-lg);
+    width: 95vw;
+  }
+  .topbar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .app-layout {
+    height: 100vh;
+    height: 100dvh;
+  }
 }
 
 /* Toast notification */

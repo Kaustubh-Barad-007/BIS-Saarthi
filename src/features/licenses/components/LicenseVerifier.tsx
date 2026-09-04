@@ -76,8 +76,8 @@ export function LicenseVerifier({ setActiveView, setSidebarOpen }: { setActiveVi
         <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="form-group" style={{ margin: 0 }}>
             <label className="form-label">{t('verifyInputLabel')}</label>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <input name="code" required className="form-input" style={{ flex: 1, fontSize: '1.05rem', textTransform: 'uppercase', letterSpacing: 2, height: 52 }} placeholder="e.g. A1B2C3 or CM/L-7654321" />
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <input name="code" required className="form-input" style={{ flex: '1 1 200px', fontSize: '1.05rem', textTransform: 'uppercase', letterSpacing: 2, height: 52 }} placeholder="e.g. A1B2C3 or CM/L-7654321" />
               <button type="submit" disabled={verifying} className="btn btn-primary" style={{ height: 52, padding: '0 24px', fontWeight: 600, gap: 8, flexShrink: 0 }}>
                 {verifying ? <span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid white', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} /> : <Search size={18} />}
                 {t('verifyBtn')}

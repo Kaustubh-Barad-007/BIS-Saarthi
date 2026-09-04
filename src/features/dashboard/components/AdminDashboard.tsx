@@ -201,8 +201,8 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
   );
 
   return (
-    <div style={{ padding: "24px 32px", maxWidth: 1400, margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
-      <div style={{ marginBottom: 28 }}>
+    <div className="page-view" style={{ maxWidth: 1400, margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
+      <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>{activeTab}</h1>
         <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginTop: 4 }}>
           {activeTab === "Dashboard" ? "Real-time metrics from your BIS database" : "Manage your " + activeTab}
@@ -384,7 +384,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
 
       {activeTab === "Dashboard" && (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 28 }}>
             {cards.map((card, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} className="stat-card">
                 <div className="stat-icon" style={{ background: card.bg, color: card.color }}>{card.icon}</div>
@@ -437,7 +437,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
             )}
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36 }} style={{ marginTop: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36 }} style={{ marginTop: 20, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16 }}>
             {[
               { name: "ISI Mark Scheme", count: "16,000+", icon: <Shield size={18} />, color: "#6366f1", bg: "rgba(99,102,241,0.1)" },
               { name: "Hallmarking Scheme", count: "1.2L+", icon: <CheckCircle2 size={18} />, color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
@@ -526,7 +526,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               animate={{ opacity: 1, scale: 1, y: 0 }} 
               exit={{ opacity: 0, scale: 0.95, y: 10 }} 
               transition={{ duration: 0.2 }} 
-              className="modal" style={{ maxWidth: 560, maxHeight: "calc(100vh - 48px)", overflowY: "auto" }}
+              className="modal" style={{ maxWidth: 560, width: "94vw", maxHeight: "calc(100dvh - 32px)", overflowY: "auto" }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10, margin: 0 }}>
@@ -610,7 +610,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               animate={{ opacity: 1, scale: 1, y: 0 }} 
               exit={{ opacity: 0, scale: 0.95, y: 10 }} 
               transition={{ duration: 0.2 }} 
-              className="modal" style={{ maxWidth: 480, maxHeight: "calc(100vh - 48px)", overflowY: "auto" }}
+              className="modal" style={{ maxWidth: 480, width: "94vw", maxHeight: "calc(100dvh - 32px)", overflowY: "auto" }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10, margin: 0 }}>
@@ -675,7 +675,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               animate={{ opacity: 1, scale: 1, y: 0 }} 
               exit={{ opacity: 0, scale: 0.95, y: 10 }} 
               transition={{ duration: 0.2 }} 
-              className="modal" style={{ maxWidth: 460, maxHeight: "calc(100vh - 48px)", overflowY: "auto" }}
+              className="modal" style={{ maxWidth: 460, width: "94vw", maxHeight: "calc(100dvh - 32px)", overflowY: "auto" }}
             >
               <div style={{ textAlign: "center", padding: "12px 8px 16px" }}>
                 <div style={{ width: 60, height: 60, borderRadius: "50%", background: "rgba(16,185,129,0.12)", color: "var(--success)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>

@@ -21,45 +21,46 @@ export default function Home() {
   return (
     <div style={{ background: "var(--bg-body)", minHeight: "100vh", overflowX: "hidden" }}>
       <nav className="landing-nav">
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div className="app-logo"><Logo size={20} /></div>
-          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS SAARTHI</span><span style={{ fontSize: "0.7rem", color: "var(--accent)", marginLeft: 6, fontWeight: 600, padding: "2px 6px", background: "var(--accent-muted)", borderRadius: 8 }}>by IntelliStd</span>
+          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS SAARTHI</span>
+          <span className="hide-mobile" style={{ fontSize: "0.7rem", color: "var(--accent)", marginLeft: 4, fontWeight: 600, padding: "2px 6px", background: "var(--accent-muted)", borderRadius: 8 }}>by IntelliStd</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button className="theme-toggle" onClick={toggleTheme}>
+          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
-            {theme === "dark" ? "Light" : "Dark"}
+            <span className="hide-mobile">{theme === "dark" ? "Light" : "Dark"}</span>
           </button>
           <button className="btn btn-ghost btn-sm" onClick={() => navigate("/sign-in")}>Sign In</button>
           <button className="btn btn-primary btn-sm" onClick={() => navigate("/sign-in")}>Get Started</button>
         </div>
       </nav>
 
-      <section className="landing-hero" style={{ padding: '100px 24px', textAlign: 'center', maxWidth: 840, margin: '0 auto', position: 'relative' }}>
+      <section className="landing-hero" style={{ padding: '96px 16px 60px', textAlign: 'center', maxWidth: 840, margin: '0 auto', position: 'relative' }}>
         <div style={{ position: "absolute", top: 0, left: "-50%", right: "-50%", height: "100%", backgroundImage: "linear-gradient(var(--border-glass) 1px, transparent 1px), linear-gradient(90deg, var(--border-glass) 1px, transparent 1px)", backgroundSize: "40px 40px", opacity: 0.2, zIndex: 0, pointerEvents: "none", maskImage: "radial-gradient(ellipse at center, black 0%, transparent 60%)", WebkitMaskImage: "radial-gradient(ellipse at center, black 0%, transparent 60%)" }} />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 'var(--radius-md)', background: "var(--bg-glass-strong)", border: "1px solid var(--border-glass)", marginBottom: 32 }}>
-            <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>SIH 2026 · Problem Statement 26107</span>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 'var(--radius-md)', background: "var(--bg-glass-strong)", border: "1px solid var(--border-glass)", marginBottom: 28, maxWidth: "90%" }}>
+            <span style={{ fontSize: "0.72rem", color: "var(--text-secondary)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>SIH 2026 · Problem Statement 26107</span>
           </div>
 
-          <h1 className="landing-title" style={{ fontSize: '3.5rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 24, lineHeight: 1.15, letterSpacing: '-0.03em' }}>
+          <h1 className="landing-title" style={{ fontSize: 'clamp(2.1rem, 6.5vw, 3.5rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20, lineHeight: 1.15, letterSpacing: '-0.03em' }}>
             BIS Intelligent Assistant
           </h1>
 
-          <p className="landing-subtitle" style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: 40, lineHeight: 1.6, maxWidth: 640, margin: '0 auto 40px' }}>
+          <p className="landing-subtitle" style={{ fontSize: 'clamp(1rem, 3.2vw, 1.2rem)', color: 'var(--text-secondary)', marginBottom: 36, lineHeight: 1.6, maxWidth: 640, margin: '0 auto 36px' }}>
             Find, understand and explore BIS standards, documents and certification information with a modern intelligent assistant.
           </p>
 
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginBottom: 64 }}>
+          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 54 }}>
             <motion.button whileHover={{ y: -2 }} whileTap={{ y: 1 }} onClick={() => navigate("/sign-in")} className="btn btn-primary btn-lg" style={{ borderRadius: 'var(--radius-md)' }}>Get Started <ArrowRight size={16} /></motion.button>
             <motion.button whileHover={{ y: -2 }} whileTap={{ y: 1 }} onClick={() => navigate("/sign-in")} className="btn btn-white btn-lg" style={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass)' }}>Sign In</motion.button>
           </div>
 
-          <div style={{ display: "inline-flex", background: "var(--bg-glass-strong)", border: "1px solid var(--border-glass)", borderRadius: 'var(--radius-md)', overflow: "hidden" }}>
-            {[["20,000+", "Indian Standards"], ["15+", "BIS Schemes"], ["800+", "Testing Labs"], ["11", "Languages"]].map(([val, label], i) => (
-              <div key={label} style={{ textAlign: "center", padding: "16px 32px", borderRight: i < 3 ? "1px solid var(--border-glass)" : "none" }}>
-                <div style={{ fontSize: "1.5rem", fontWeight: 700, color: 'var(--text-primary)' }}>{val}</div>
-                <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: 4, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
+          <div className="landing-stats-grid">
+            {[["20,000+", "Indian Standards"], ["15+", "BIS Schemes"], ["800+", "Testing Labs"], ["11", "Languages"]].map(([val, label]) => (
+              <div key={label} className="landing-stat-item">
+                <div style={{ fontSize: "1.4rem", fontWeight: 700, color: 'var(--text-primary)' }}>{val}</div>
+                <div style={{ fontSize: "0.72rem", color: "var(--text-secondary)", marginTop: 4, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
               </div>
             ))}
           </div>

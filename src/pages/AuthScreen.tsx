@@ -239,14 +239,15 @@ export default function AuthScreen({ type }: { type: 'login' | 'register' }) {
   return (
     <div className="auth-page">
       <nav className="landing-nav" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, background: 'transparent', borderBottom: 'none' }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: 'pointer' }} onClick={() => navigate("/")}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: 'pointer' }} onClick={() => navigate("/")}>
           <div className="app-logo"><Logo size={20} /></div>
-          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS SAARTHI</span><span style={{ fontSize: "0.7rem", color: "var(--accent)", marginLeft: 6, fontWeight: 600, padding: "2px 6px", background: "var(--accent-muted)", borderRadius: 8 }}>by IntelliStd</span>
+          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS SAARTHI</span>
+          <span className="hide-mobile" style={{ fontSize: "0.7rem", color: "var(--accent)", marginLeft: 4, fontWeight: 600, padding: "2px 6px", background: "var(--accent-muted)", borderRadius: 8 }}>by IntelliStd</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button className="theme-toggle" onClick={toggleTheme}>
+          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
-            {theme === "dark" ? "Light" : "Dark"}
+            <span className="hide-mobile">{theme === "dark" ? "Light" : "Dark"}</span>
           </button>
           {type === 'register' ? (
             <button className="btn btn-ghost btn-sm" onClick={() => navigate("/sign-in")}>Sign In</button>

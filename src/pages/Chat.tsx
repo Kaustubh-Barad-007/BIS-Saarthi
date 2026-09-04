@@ -520,12 +520,18 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
   const startNewChat = () => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
     setActiveConvId(null);
     setMessages([{ id: '0', role: 'assistant', content: getWelcomeMsg(userRole, language) }]);
     setInput('');
     setActiveView('chat');
   };
   const loadConversation = async (id: string) => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
     setActiveConvId(id);
     setActiveView('chat');
     setIsChatLoading(true);
@@ -665,7 +671,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
   };
   const roleLabel = t(userRole) || userRole;
   return (
-    <div className="app-layout" style={{ height: '100vh' }}>
+    <div className="app-layout">
       {/* Sidebar Overlay for Mobile */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -676,7 +682,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
             className="sidebar-overlay"
             onClick={() => setSidebarOpen(false)}
             style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'none', WebkitBackdropFilter: 'none', zIndex: 40, display: typeof window !== 'undefined' && window.innerWidth > 768 ? 'none' : 'block'
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'none', WebkitBackdropFilter: 'none', zIndex: 40
             }}
           />
         )}
@@ -992,7 +998,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                 <Logo size={20} />
               </div>
               <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                BIS Assistant <span style={{ opacity: 0.5, fontWeight: 500, fontSize: '0.85rem' }}>· {roleLabel}</span>
+                BIS Assistant <span className="hide-mobile" style={{ opacity: 0.5, fontWeight: 500, fontSize: '0.85rem' }}>· {roleLabel}</span>
               </span>
             </div>
           </div>

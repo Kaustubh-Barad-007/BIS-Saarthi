@@ -20,10 +20,10 @@ export function FeeEstimator({ setActiveView }: { setActiveView: (v: string) => 
         </button>
       </div>
       
-      <div style={{ maxWidth: 600, padding: 32, background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 24 }}>
+      <div className="panel" style={{ maxWidth: 600, padding: 24, borderRadius: 24 }}>
         <div className="form-group" style={{ marginBottom: 20 }}>
           <label className="form-label">{t('enterpriseType')}</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8 }}>
             {[t('microScale'), t('smallScale'), t('largeScale')].map((tLabel, i) => (
               <button 
                 key={i} 

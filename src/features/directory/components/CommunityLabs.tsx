@@ -143,7 +143,7 @@ export function CommunityLabs({ setActiveView }: { setActiveView: (v: string) =>
           {labResults && (
             <div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>{labResults.length} Recognized Labs Found</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
                 {labResults.map((lab: any) => (
                   <div key={lab.id} className="panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -181,11 +181,11 @@ export function CommunityLabs({ setActiveView }: { setActiveView: (v: string) =>
           </div>
 
           {loadingClubs ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>{[1,2,3,4].map(i => <div key={i} style={{ height: 180, borderRadius: 20, background: 'var(--bg-glass-strong)', opacity: 0.6 }} />)}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>{[1,2,3,4].map(i => <div key={i} style={{ height: 180, borderRadius: 20, background: 'var(--bg-glass-strong)', opacity: 0.6 }} />)}</div>
           ) : clubsResults.length === 0 ? (
             <div className="panel" style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>No Standards Clubs found.</div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
               {clubsResults.map(club => (
                 <div key={club.id} className="panel" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>

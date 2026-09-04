@@ -39,7 +39,7 @@ export function ApplyLicenseModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="modal-backdrop">
-      <motion.div initial={{opacity: 0, scale: 0.95, y: 10}} animate={{opacity: 1, scale: 1, y: 0}} className="modal" style={{maxWidth: 560}}>
+      <motion.div initial={{opacity: 0, scale: 0.95, y: 10}} animate={{opacity: 1, scale: 1, y: 0}} className="modal" style={{maxWidth: 560, width: '94vw', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto'}}>
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20}}>
           <h2 style={{fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0}}>Apply for BIS Certification License</h2>
           <button onClick={onClose} className="icon-btn" style={{background: 'transparent'}}>
@@ -67,7 +67,7 @@ export function ApplyLicenseModal({ onClose }: { onClose: () => void }) {
                 {error}
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
               <div className="form-group">
                 <label className="form-label">Product IS Standard</label>
                 <input name="isCode" type="text" required placeholder="e.g. IS 14543 or IS 10500" className="form-input" style={{ borderRadius: 10 }} />
