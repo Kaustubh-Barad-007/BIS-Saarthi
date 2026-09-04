@@ -3,7 +3,7 @@ import { AboutBIS } from '@/features/info/components/AboutBIS';
 import { DocumentVault } from '@/features/vault/components/DocumentVault';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Send, User, Plus, Trash2, PanelLeftClose, PanelLeftOpen, Globe, Sun, Moon, LogOut, MessageSquare, ChevronDown, Mic, Paperclip, Copy, Download, Check, CheckCircle2, Volume2, ThumbsUp, ThumbsDown, AlertCircle, AlertTriangle, X, ShieldCheck, RefreshCcw, Search, Building2, FileText, MapPin, Activity, Library, Calculator, ExternalLink, Upload, Info, HelpCircle, Layers , Image, MoreVertical, Edit3, Pin, Share2, Bell, Radio, Award } from 'lucide-react';
+import { Send, User, Plus, Trash2, PanelLeftClose, PanelLeftOpen, Globe, Sun, Moon, LogOut, MessageSquare, ChevronDown, Mic, Paperclip, Copy, Download, Check, CheckCircle2, Volume2, ThumbsUp, ThumbsDown, AlertCircle, AlertTriangle, X, ShieldCheck, RefreshCcw, Search, Building2, FileText, MapPin, Activity, Library, Calculator, ExternalLink, Upload, Info, HelpCircle, Layers , Image, MoreVertical, Edit3, Pin, Share2, Bell, Radio, Award, PlayCircle } from 'lucide-react';
 import { useLanguage } from '@/app/providers/LanguageContext';
 import { useAuth } from '@/app/providers/AuthContext';
 import { useTheme } from '@/app/providers/ThemeContext';
@@ -18,6 +18,7 @@ import { CertificationGuide } from '@/features/directory/components/Certificatio
 import { ComplaintsHub } from '@/features/complaints/components/ComplaintsHub';
 import { CommunityLabs } from '@/features/directory/components/CommunityLabs';
 import { ComplianceRadar } from '@/features/compliance/components/ComplianceRadar';
+import { JourneyRoadmap } from '@/features/journey/components/JourneyRoadmap';
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -276,7 +277,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
       setUploadingAvatar(false);
     }
   };
-  const [activeView, setActiveView] = useState<'chat' | 'standards' | 'calculator' | 'verify' | 'complaint' | 'track' | 'lab' | 'guide' | 'clubs' | 'faq' | 'about' | 'vault' | 'licenses' | 'apply_license' | 'complaints_hub' | 'community_labs' | 'radar'>('chat');
+  const [activeView, setActiveView] = useState<'chat' | 'standards' | 'calculator' | 'verify' | 'complaint' | 'track' | 'lab' | 'guide' | 'clubs' | 'faq' | 'about' | 'vault' | 'licenses' | 'apply_license' | 'complaints_hub' | 'community_labs' | 'radar' | 'journey'>('chat');
   const [viewParams, setViewParams] = useState<any>({});
   
   
@@ -952,6 +953,9 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
               {/* Manufacturer Tools */}
               {userRole === 'manufacturer' && (
                 <>
+                  <button className={`sidebar-item ${activeView === 'journey' ? 'active' : ''}`} onClick={() => { setActiveView('journey' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
+                    <PlayCircle size={15} /> My BIS Journey
+                  </button>
                   <button className={`sidebar-item ${activeView === 'licenses' ? 'active' : ''}`} onClick={() => { setActiveView('licenses' as any); if (typeof window !== 'undefined' && window.innerWidth <= 768) setSidebarOpen(false); }}>
                     <Award size={15} /> License Portal
                   </button>
@@ -1470,6 +1474,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
         {/* ===== DOCUMENT VAULT ===== */}
         {activeView === 'vault' && <DocumentVault setActiveView={setActiveView as any} />}
         {activeView === 'radar' && <ComplianceRadar setActiveView={setActiveView as any} />}
+        {activeView === 'journey' && <JourneyRoadmap setActiveView={setActiveView as any} />}
       </div>
 
             {/* Notification Detail Modal */}
