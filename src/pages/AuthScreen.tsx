@@ -238,7 +238,7 @@ export default function AuthScreen({ type }: { type: 'login' | 'register' }) {
 
   return (
     <div className="auth-page">
-      <nav className="landing-nav" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, background: 'transparent', borderBottom: 'none' }}>
+      <nav className="landing-nav">
         <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: 'pointer' }} onClick={() => navigate("/")}>
           <div className="app-logo"><Logo size={20} /></div>
           <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS SAARTHI</span>
@@ -250,9 +250,11 @@ export default function AuthScreen({ type }: { type: 'login' | 'register' }) {
             <span className="hide-mobile">{theme === "dark" ? "Light" : "Dark"}</span>
           </button>
           {type === 'register' ? (
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate("/sign-in")}>Sign In</button>
+            <><button className="btn btn-ghost btn-sm" onClick={() => navigate("/sign-in")}>Sign In</button>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate("/")}>Home</button></>
           ) : (
-            <button className="btn btn-primary btn-sm" onClick={() => navigate("/register")}>Get Started</button>
+            <><button className="btn btn-ghost btn-sm" onClick={() => navigate("/")}>Home</button>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate("/register")}>Get Started</button></>
           )}
         </div>
       </nav>

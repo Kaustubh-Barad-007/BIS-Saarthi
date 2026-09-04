@@ -148,7 +148,12 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
   const { user, token, logout, setAvatar } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(!hideSidebar);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (hideSidebar) return false;
+    // On mobile, start with sidebar closed; on desktop, start open
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) return false;
+    return true;
+  });
   const { language, setLanguage, t } = useLanguage();
   
   const getWelcomeMsg = (role: string, lang: string) => {
@@ -1053,7 +1058,7 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
             <button className="icon-btn hide-mobile" onClick={toggleTheme} style={{ background: 'var(--bg-glass-strong)', borderRadius: 'var(--radius-md)', width: 40, height: 40 }}>
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-                                    {/* Notification Bell Widget with Redirection */}
+                                    {/* Notification Bell Widget */}
             <div style={{ position: 'relative' }}>
               <button
                 className="icon-btn"
@@ -1078,89 +1083,118 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
 
               <AnimatePresence>
                 {showNotifCenter && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className="notif-panel"
-                    style={{
-                      position: 'absolute', right: 0, top: 48, width: 'min(340px, calc(100vw - 16px))', maxHeight: 460,
-                      background: 'var(--bg-modal)', border: '1px solid var(--border-glass)',
-                      borderRadius: 16, boxShadow: 'var(--shadow-glass)', zIndex: 1000,
-                      display: 'flex', flexDirection: 'column', overflow: 'hidden'
-                    }}
-                  >
-                    <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Bell size={16} color="var(--accent)" />
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Notifications</span>
-                        {unreadNotifCount > 0 && (
-                          <span className="pill pill-red" style={{ fontSize: '0.65rem', padding: '1px 6px' }}>{unreadNotifCount} new</span>
+                  <>
+                    {/* Mobile: full-screen backdrop + bottom sheet */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setShowNotifCenter(false)}
+                      style={{
+                        display: 'none',
+                        position: 'fixed', inset: 0,
+                        background: 'rgba(0,0,0,0.7)',
+                        zIndex: 999,
+                      }}
+                      className="notif-backdrop"
+                    />
+                    {/* Panel: absolute on desktop, fixed bottom-sheet on mobile */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="notif-panel"
+                      style={{
+                        position: 'absolute', right: 0, top: 48,
+                        width: 'min(340px, calc(100vw - 16px))',
+                        maxHeight: 460,
+                        background: 'var(--bg-modal)', border: '1px solid var(--border-glass)',
+                        borderRadius: 16, boxShadow: 'var(--shadow-glass)', zIndex: 1000,
+                        display: 'flex', flexDirection: 'column', overflow: 'hidden'
+                      }}
+                    >
+                      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Bell size={16} color="var(--accent)" />
+                          <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Notifications</span>
+                          {unreadNotifCount > 0 && (
+                            <span className="pill pill-red" style={{ fontSize: '0.65rem', padding: '1px 6px' }}>{unreadNotifCount} new</span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {notifications.length > 0 && (
+                            <button
+                              onClick={markAllNotificationsAsRead}
+                              style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '4px 8px' }}
+                            >
+                              Mark all read
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setShowNotifCenter(false)}
+                            className="icon-btn"
+                            style={{ width: 28, height: 28, background: 'var(--bg-hover)', borderRadius: 8 }}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div style={{ flex: 1, overflowY: 'auto', maxHeight: 360, display: 'flex', flexDirection: 'column' }}>
+                        {notifications.length === 0 ? (
+                          <div style={{ padding: '36px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                            <Bell size={32} style={{ margin: '0 auto 8px', opacity: 0.3 }} />
+                            No notifications or alerts yet
+                          </div>
+                        ) : (
+                          notifications.map((notif: any) => (
+                            <div
+                              key={notif.id}
+                              onClick={() => handleNotificationClick(notif)}
+                              style={{
+                                padding: '12px 16px', borderBottom: '1px solid var(--border-glass)',
+                                background: notif.read ? 'transparent' : 'rgba(37, 99, 235, 0.05)',
+                                cursor: 'pointer', transition: 'background 0.15s',
+                                display: 'flex', gap: 12, alignItems: 'flex-start'
+                              }}
+                              onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                              onMouseLeave={e => (e.currentTarget.style.background = notif.read ? 'transparent' : 'rgba(37, 99, 235, 0.05)')}
+                            >
+                              <div style={{
+                                width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                                background: notif.type === 'RADAR_ALERT' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(37, 99, 235, 0.12)',
+                                color: notif.type === 'RADAR_ALERT' ? '#f59e0b' : 'var(--accent)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                              }}>
+                                {notif.type === 'RADAR_ALERT' ? <AlertTriangle size={16} /> : <FileText size={16} />}
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2, gap: 8 }}>
+                                  <div style={{ fontSize: '0.82rem', fontWeight: notif.read ? 600 : 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {notif.title}
+                                  </div>
+                                  {!notif.read && (
+                                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />
+                                  )}
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                  {notif.message}
+                                </div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                                  {new Date(notif.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                          ))
                         )}
                       </div>
-                      {notifications.length > 0 && (
-                        <button
-                          onClick={markAllNotificationsAsRead}
-                          style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
-                        >
-                          Mark all read
-                        </button>
-                      )}
-                    </div>
-
-                    <div style={{ flex: 1, overflowY: 'auto', maxHeight: 360, display: 'flex', flexDirection: 'column' }}>
-                      {notifications.length === 0 ? (
-                        <div style={{ padding: '36px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                          <Bell size={32} style={{ margin: '0 auto 8px', opacity: 0.3 }} />
-                          No notifications or alerts yet
-                        </div>
-                      ) : (
-                        notifications.map((notif: any) => (
-                          <div
-                            key={notif.id}
-                            onClick={() => handleNotificationClick(notif)}
-                            style={{
-                              padding: '12px 16px', borderBottom: '1px solid var(--border-glass)',
-                              background: notif.read ? 'transparent' : 'rgba(37, 99, 235, 0.05)',
-                              cursor: 'pointer', transition: 'background 0.15s',
-                              display: 'flex', gap: 12, alignItems: 'flex-start'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
-                            onMouseLeave={e => e.currentTarget.style.background = notif.read ? 'transparent' : 'rgba(37, 99, 235, 0.05)'}
-                          >
-                            <div style={{
-                              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                              background: notif.type === 'RADAR_ALERT' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(37, 99, 235, 0.12)',
-                              color: notif.type === 'RADAR_ALERT' ? '#f59e0b' : 'var(--accent)',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}>
-                              {notif.type === 'RADAR_ALERT' ? <AlertTriangle size={16} /> : <FileText size={16} />}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                                <div style={{ fontSize: '0.82rem', fontWeight: notif.read ? 600 : 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {notif.title}
-                                </div>
-                                {!notif.read && (
-                                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />
-                                )}
-                              </div>
-                              <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {notif.message}
-                              </div>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                                {new Date(notif.createdAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  </>
                 )}
               </AnimatePresence>
             </div>
+
             {/* Topbar Profile Widget */}
             <div style={{ position: 'relative' }}>
               <div 
