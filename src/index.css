@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-@import './mobile-tweaks.css';
+
 /* ============================================================
    BIS Assistant — Premium Design System v3
    Inspired by Linear, Vercel, Notion aesthetics
@@ -211,7 +211,7 @@ body {
 }
 
 .sidebar-item:hover { background: var(--bg-hover); color: var(--text-primary); transform: translateX(1px); }
-.sidebar-item.active { color: var(--accent); font-weight: 600; background: transparent; }
+.sidebar-item.active { color: #FFFFFF; font-weight: 600; background: transparent; }
 .sidebar-item.active::before {
   content: '';
   position: absolute;
@@ -336,7 +336,7 @@ body {
 .msg-bubble.prose .md-h3 {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--accent);
+  color: #FFFFFF;
   margin: 14px 0 6px 0;
   display: flex;
   align-items: center;
@@ -380,7 +380,7 @@ body {
 }
 
 .msg-bubble.prose .md-li-bullet::marker {
-  color: var(--accent);
+  color: #FFFFFF;
 }
 
 .msg-bubble.prose strong {
@@ -390,13 +390,13 @@ body {
 
 .msg-bubble.prose .inline-code {
   font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-  background: var(--accent-muted);
-  color: var(--accent);
+  background: rgba(255,255,255,0.1);
+  color: #FFFFFF;
   padding: 2px 7px;
   border-radius: 6px;
   font-size: 0.84em;
   font-weight: 600;
-  border: 1px solid rgba(26, 86, 219, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .msg-bubble.prose .code-block-container {
@@ -420,14 +420,14 @@ body {
   margin: 14px 0;
   padding: 10px 16px;
   background: rgba(26, 86, 219, 0.06);
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid #FFFFFF;
   border-radius: 0 10px 10px 0;
   color: var(--text-secondary);
   font-style: italic;
 }
 
 .msg-bubble.prose .md-link {
-  color: var(--accent);
+  color: #FFFFFF;
   text-decoration: underline;
   text-underline-offset: 3px;
   font-weight: 500;
@@ -563,6 +563,55 @@ body {
 .btn-ghost { background: var(--bg-glass); color: var(--text-secondary); border: 1px solid var(--border-glass); }
 .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
 
+.btn-secondary { background: var(--bg-glass-strong); color: var(--text-primary); border: 1px solid var(--border-glass); }
+.btn-secondary:hover { background: var(--bg-hover); border-color: var(--border-hover); }
+
+/* Segmented Tabs (Complaints Hub, Community Labs, etc.) */
+.tab-container {
+  display: inline-flex;
+  background: var(--bg-glass-strong);
+  padding: 5px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-glass);
+  gap: 6px;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.tab:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.tab.active {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
 .btn-white { background: #ffffff; color: #0a0a14; box-shadow: var(--shadow-sm); }
 .btn-white:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
@@ -636,7 +685,7 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-input:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.form-input:focus, .form-select:focus { border-color: #FFFFFF; box-shadow: 0 0 0 3px var(--accent-glow); }
 .form-input::placeholder { color: var(--text-muted); }
 .form-select { cursor: pointer; appearance: none; }
 .form-select option { background: #0e0e1a; color: #f0f0ff; }
@@ -671,6 +720,8 @@ body {
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
 .suggestion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
@@ -692,7 +743,7 @@ body {
 .suggestion-card:hover {
   border-color: var(--border-active);
   color: var(--text-primary);
-  background: var(--accent-muted);
+  background: rgba(255,255,255,0.1);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
@@ -833,7 +884,7 @@ body {
 .skeleton { animation: shimmer 1.5s infinite ease-in-out; }
 
 .gradient-text {
-  color: var(--accent);
+  color: #FFFFFF;
   font-weight: 700;
 }
 
@@ -995,7 +1046,7 @@ body {
 }
 
 .lang-item:hover { background: var(--bg-hover); color: var(--text-primary); }
-.lang-item.active { background: var(--accent-muted); color: var(--accent); font-weight: 600; }
+.lang-item.active { background: rgba(255,255,255,0.1); color: #FFFFFF; font-weight: 600; }
 
 /* Message action buttons */
 .msg-actions {
@@ -1024,7 +1075,7 @@ body {
 }
 
 .msg-action-btn:hover { background: var(--bg-hover); color: var(--text-secondary); transform: scale(1.1); }
-.msg-action-btn.active { color: var(--accent); }
+.msg-action-btn.active { color: #FFFFFF; }
 
 /* Profile modal specific */
 .profile-avatar {
@@ -1036,13 +1087,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent-muted);
+  background: rgba(255,255,255,0.1);
   position: relative;
   cursor: pointer;
   transition: border-color 0.2s;
 }
 
-.profile-avatar:hover { border-color: var(--accent); }
+.profile-avatar:hover { border-color: #FFFFFF; }
 
 .profile-avatar-overlay {
   position: absolute;
@@ -1197,7 +1248,7 @@ body {
 }
 
 .admin-nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
-.admin-nav-item.active { background: var(--accent-muted); color: var(--accent); font-weight: 600; }
+.admin-nav-item.active { background: rgba(255,255,255,0.1); color: #FFFFFF; font-weight: 600; }
 .admin-nav-item.active::before {
   content: "";
   position: absolute;

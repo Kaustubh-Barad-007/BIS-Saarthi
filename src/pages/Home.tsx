@@ -1,7 +1,7 @@
-import { useLanguage } from '@/lib/LanguageContext';
+import { useLanguage } from '@/app/providers/LanguageContext';
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "@/lib/ThemeContext";
+import { useTheme } from "@/app/providers/ThemeContext";
 import { Sun, Moon, ArrowRight, BookOpen, ShieldCheck, Award, FlaskConical, Languages, Zap, Building2, MessageSquare } from "lucide-react";
 import Logo from "@/components/Logo";
 import { useEffect } from "react";
@@ -23,7 +23,7 @@ export default function Home() {
       <nav className="landing-nav">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div className="app-logo"><Logo size={20} /></div>
-          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS Assistant</span>
+          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS SAARTHI</span><span style={{ fontSize: "0.7rem", color: "var(--accent)", marginLeft: 6, fontWeight: 600, padding: "2px 6px", background: "var(--accent-muted)", borderRadius: 8 }}>by IntelliStd</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <button className="theme-toggle" onClick={toggleTheme}>
@@ -133,4 +133,5 @@ const features = [
   { icon: <MessageSquare size={18} />, title: "Complaint Filing", desc: "File and track product complaints directly with BIS. Get a tracking ID instantly.", color: "#f43f5e", bg: "rgba(244,63,94,0.1)" },
   { icon: <Building2 size={18} />, title: "Standards Clubs", desc: "Find BIS Standards Clubs near you for schools, colleges, and institutions.", color: "#06b6d4", bg: "rgba(6,182,212,0.1)" },
 ];
+
 

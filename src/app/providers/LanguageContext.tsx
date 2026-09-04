@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UI_STRINGS } from './i18n';
+import type { ReactNode } from 'react';
+import { UI_STRINGS } from '@/shared/lib/i18n';
 
 interface LanguageContextType {
   language: string;

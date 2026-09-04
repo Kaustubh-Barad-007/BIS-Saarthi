@@ -1,6 +1,6 @@
 # 🇮🇳 Bureau of Indian Standards (BIS) — Intelligent Assistant Platform
 
-[![Live Demo](https://img.shields.io/badge/Production-Live%20Demo-003366?style=for-the-badge&logo=vercel)](https://bis-assistant.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Production-Live%20Demo-003366?style=for-the-badge&logo=vercel)](https://bis-saarthi-sih.vercel.app)
 [![CI](https://github.com/Kaustubh-Barad-007/bis-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/Kaustubh-Barad-007/bis-assistant/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)

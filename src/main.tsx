@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { AuthProvider } from './lib/AuthContext'
-import { ThemeProvider } from './lib/ThemeContext'
-import { LanguageProvider } from './lib/LanguageContext'
+import { AuthProvider } from './app/providers/AuthContext'
+import { ThemeProvider } from './app/providers/ThemeContext'
+import { LanguageProvider } from './app/providers/LanguageContext'
 import App from './App'
 import './index.css'
 

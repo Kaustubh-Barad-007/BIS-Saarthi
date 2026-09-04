@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { prisma } from '../src/server/db/client.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -108,6 +107,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   } catch (error: any) {
     console.error("Verify error:", error);
-    return res.status(500).json({ error: error.message });
+    return res.status(503).json({ error: "Verification service temporarily unavailable. Please try again." });
   }
 }
+

@@ -3,7 +3,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import Home from '@/pages/Home';
 import DashboardRouter from '@/pages/DashboardRouter';
 import AuthScreen from '@/pages/AuthScreen';
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from '@/app/providers/AuthContext';
 
 function App() {
   const { role } = useAuth();

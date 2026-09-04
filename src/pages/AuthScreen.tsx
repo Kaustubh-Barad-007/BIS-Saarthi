@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useLanguage } from '@/lib/LanguageContext';
+import { useLanguage } from '@/app/providers/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/lib/AuthContext';
-import { useTheme } from '@/lib/ThemeContext';
+import { useAuth } from '@/app/providers/AuthContext';
+import { useTheme } from '@/app/providers/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Sun, Moon, User, Factory, Mail, CheckCircle2, ArrowLeft, RefreshCw, Shield, Sparkles } from 'lucide-react';
 import Logo from '@/components/Logo';
@@ -79,31 +79,48 @@ export default function AuthScreen({ type }: { type: 'login' | 'register' }) {
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setOauthLoading('Google');
+      setError('');
       try {
-        const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        }).then(res => res.json());
-        
+        let userInfo: any;
+        try {
+          const infoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          });
+          userInfo = await infoRes.json();
+          if (!userInfo.email) throw new Error('Google did not return your email. Please check your Google account settings.');
+        } catch (e: any) {
+          throw new Error(e.message || 'Failed to fetch Google profile. Please try again.');
+        }
+
         const res = await fetch('/api/auth?action=oauth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ provider: 'Google', email: userInfo.email, name: userInfo.name, role }),
+          body: JSON.stringify({ provider: 'Google', email: userInfo.email, name: userInfo.name, avatar: userInfo.picture, role }),
         });
         const data = await res.json();
-        
+
         if (res.ok) {
-          login(data.token, data.role, data.email, data.name, data.avatar);
+          login(data.token, data.role, data.email, data.name, data.avatar || userInfo.picture);
           navigate('/dashboard');
         } else {
-          throw new Error(data.error || 'Google login failed');
+          throw new Error(data.error || 'Google sign-in failed. Please try again.');
         }
       } catch (err: any) {
-        setError(err.message || 'Google Auth Error');
+        setError(err.message || 'Google sign-in failed. Please try again.');
       } finally {
         setOauthLoading(null);
       }
     },
-    onError: () => setError('Google Login Failed')
+    onError: (err: any) => {
+      setOauthLoading(null);
+      if (err?.type === 'popup_closed') {
+        setError('Google sign-in popup was closed. Please try again.');
+      } else if (err?.type === 'popup_failed_to_open') {
+        setError('Could not open Google sign-in popup. Please allow popups for this site.');
+      } else {
+        setError('Google sign-in failed. Please ensure your Google account is configured at Google Cloud Console with this domain.');
+      }
+    }
   });
 
   const sendOtpRequest = async (targetEmail: string) => {
@@ -135,58 +152,76 @@ export default function AuthScreen({ type }: { type: 'login' | 'register' }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
+    // Client-side validation
+    if (!email.trim()) return setError('Please enter your email address.');
+    if (type === 'login' && !password) return setError('Please enter your password.');
+    if (type === 'register' && step === 'form') {
+      if (!name.trim()) return setError('Please enter your full name.');
+      if (password.length < 6) return setError('Password must be at least 6 characters.');
+    }
+
+    // ── REGISTER STEP 1: Send OTP ──────────────────────────────────────────
     if (type === 'register' && step === 'form') {
       setLoading(true);
       try {
-        await sendOtpRequest(email);
+        await sendOtpRequest(email.trim());
         setStep('otp');
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || 'Failed to send verification code. Please try again.');
       } finally {
         setLoading(false);
       }
       return;
     }
 
+    // ── REGISTER STEP 2: Verify OTP + Create Account ───────────────────────
     if (type === 'register' && step === 'otp') {
+      if (!otpCode || otpCode.length < 6) return setError('Please enter the 6-digit code sent to your email.');
       setLoading(true);
       try {
+        // Step A: Verify OTP
         const verifyRes = await fetch('/api/auth?action=otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'verify', email, code: otpCode.trim() }),
+          body: JSON.stringify({ action: 'verify', email: email.trim(), code: otpCode.trim() }),
         });
         const verifyData = await verifyRes.json();
-        if (!verifyRes.ok) throw new Error(verifyData.error || 'Invalid OTP');
-      } catch (err: any) {
-        setError(err.message);
-        setLoading(false);
-        return;
-      }
-    }
+        if (!verifyRes.ok) throw new Error(verifyData.error || 'Invalid verification code. Please try again.');
 
-    if (type === 'login' && email === 'admin@bis.gov.in' && password === 'admin123') {
-      login('mock-admin-token', 'admin', 'admin@bis.gov.in', 'System Administrator');
-      navigate('/dashboard');
+        // Step B: Create account
+        const regRes = await fetch('/api/auth?action=register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim(), password, role, name: name.trim(), avatar }),
+        });
+        const regData = await regRes.json();
+        if (!regRes.ok) throw new Error(regData.error || 'Account creation failed. Please try again.');
+
+        login(regData.token, regData.role, regData.email, regData.name, regData.avatar);
+        navigate('/dashboard');
+      } catch (err: any) {
+        setError(err.message || 'Registration failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
+    // ── LOGIN ──────────────────────────────────────────────────────────────
     setLoading(true);
     try {
-      const endpoint = type === 'login' ? '/api/auth?action=login' : '/api/auth?action=register';
-      const body = type === 'login' ? { email, password } : { email, password, role, name, avatar };
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/auth?action=login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Authentication failed');
+      if (!res.ok) throw new Error(data.error || 'Login failed. Please check your credentials.');
       login(data.token, data.role, data.email, data.name, data.avatar);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -196,27 +231,30 @@ export default function AuthScreen({ type }: { type: 'login' | 'register' }) {
     if (provider === 'Google') {
       googleLogin();
     } else if (provider === 'GitHub') {
-      const clientId = 'Ov23lijoTQsdwPhV5lDv';
+      const clientId = 'Ov23liLRysxBX9AWvnlO';
       window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=user:email&state=${role}`;
     }
   };
 
   return (
     <div className="auth-page">
-      {/* Theme toggle top right */}
-      <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 50 }}>
-        <button className="theme-toggle" onClick={toggleTheme}>
-          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-        </button>
-      </div>
-
-      {/* Logo top left */}
-      <div style={{ position: 'fixed', top: 16, left: 16, display: 'flex', alignItems: 'center', gap: 10, zIndex: 50 }}>
-        <div className="app-logo">
-          <Logo size={20} />
+      <nav className="landing-nav" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, background: 'transparent', borderBottom: 'none' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: 'pointer' }} onClick={() => navigate("/")}>
+          <div className="app-logo"><Logo size={20} /></div>
+          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)", letterSpacing: "-0.02em" }}>BIS SAARTHI</span><span style={{ fontSize: "0.7rem", color: "var(--accent)", marginLeft: 6, fontWeight: 600, padding: "2px 6px", background: "var(--accent-muted)", borderRadius: 8 }}>by IntelliStd</span>
         </div>
-        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>BIS Assistant</span>
-      </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button className="theme-toggle" onClick={toggleTheme}>
+            {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
+          {type === 'register' ? (
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate("/sign-in")}>Sign In</button>
+          ) : (
+            <button className="btn btn-primary btn-sm" onClick={() => navigate("/register")}>Get Started</button>
+          )}
+        </div>
+      </nav>
 
       <motion.div
         initial={{ opacity: 0, y: 16 }}

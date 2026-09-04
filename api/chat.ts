@@ -1,24 +1,22 @@
 export const maxDuration = 60;
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient } from '@prisma/client';
-import { GoogleGenAI } from '@google/genai';
 import jwt from 'jsonwebtoken';
+import { GoogleGenAI } from '@google/genai';
 
-const prisma = new PrismaClient();
+import { prisma } from '../src/server/db/client.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-demo';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { message, role, language, conversationId, file } = req.body;
+    const { message, history, role, language, conversationId, file } = req.body;
     if (!message) return res.status(400).json({ error: 'Message is required' });
     const startTime = Date.now();
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '';
+    if (!apiKey) return res.status(503).json({ error: 'AI service not configured. Please contact support.' });
 
-    // Get user from JWT if present
     let userId: string | null = null;
     const authHeader = req.headers.authorization;
     if (authHeader?.startsWith('Bearer ')) {
@@ -28,48 +26,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       } catch { /* anonymous */ }
     }
 
-    // Build system prompt
-    const langMap: Record<string, string> = {
-      hi: 'Respond completely in authentic, natural Hindi (हिन्दी). Provide all technical Indian Standard (IS) codes in standard digits/English characters and all explanations in rich, fluent Hindi.',
-      mr: 'Respond completely in authentic, natural Marathi (मराठी). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Marathi.',
-      bn: 'Respond completely in authentic, natural Bengali (বাংলা). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Bengali.',
-      ta: 'Respond completely in authentic, natural Tamil (தமிழ்). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Tamil.',
-      te: 'Respond completely in authentic, natural Telugu (తెలుగు). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Telugu.',
-      gu: 'Respond completely in authentic, natural Gujarati (ગુજરાતી). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Gujarati.',
-      kn: 'Respond completely in authentic, natural Kannada (ಕನ್ನಡ). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Kannada.',
-      ml: 'Respond completely in authentic, natural Malayalam (മലയാളം). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Malayalam.',
-      pa: 'Respond completely in authentic, natural Punjabi (ਪੰਜਾਬੀ). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Punjabi.',
-      or: 'Respond completely in authentic, natural Odia (ଓଡ଼ିଆ). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Odia.',
-      as: 'Respond completely in authentic, natural Assamese (অসমীয়া). Provide all technical Indian Standard (IS) codes in standard notation and all explanations in rich, fluent Assamese.',
-      en: 'Respond in clear, precise, and professional English.',
-    };
-    const langNote = language && language !== 'en' ? `\n\nCRITICAL LANGUAGE DIRECTIVE: ${langMap[language] || ''}` : '';
+    let langNote = '';
+    if (language && language !== 'en') {
+      const langs: Record<string, string> = { hi: 'Hindi', mr: 'Marathi', gu: 'Gujarati', bn: 'Bengali', kn: 'Kannada', ta: 'Tamil', te: 'Telugu', ur: 'Urdu' };
+      if (langs[language]) langNote = `\n\nCRITICAL INSTRUCTION: You MUST reply entirely in ${langs[language]}. Do not use English.`;
+    }
 
-    let systemPrompt = `You are the official BIS Intelligent Assistant powered by GraphRAG & Multi-Modal Vision (Bureau of Indian Standards, Government of India - SIH Problem Statement 26107).
+    let systemPrompt = `You are 'BIS SAARTHI', the official Bureau of Indian Standards (BIS) AI Assistant (SIH 2026).
+Your goal is to provide authoritative, accurate, and direct information strictly and exclusively regarding the Bureau of Indian Standards (BIS), Indian Standards (IS codes), conformity assessment, and the BIS Saarthi platform.
 
-CRITICAL DIRECTIVES:
-1. CRISP, HIGH-DENSITY & PRECISE FORMAT (SIH UI Architecture Standard):
-   - Answer directly and concisely in 2 to 4 structured sections without verbose introductions.
-   - Use this exact standard layout:
-     • **Standard & Scope**: State the exact applicable Indian Standard (**IS Code:Year - Title**) and mandatory/voluntary status.
-     • **Key Clause (Extract)**: State the exact clause (**Clause X.Y**) and the core technical requirement, parameter limit, or safety threshold.
-     • **Scheme & Conformity**: Applicable BIS Scheme (e.g. ISI Mark Scheme-I, CRS Scheme-II, FMCS Scheme-IV, Hallmarking) and required testing procedures.
-     • **Recommended Testing Lab**: Primary NABL-accredited / BIS-recognized laboratory for testing.
-   - If the user asks for fees or steps, provide a concise table or numbered list.
+STRICT DOMAIN RESTRICTION (MANDATORY ENFORCEMENT):
+1. ONLY BIS & PLATFORM TOPICS PERMITTED:
+   You are strictly restricted to answering questions directly concerning:
+   - Bureau of Indian Standards (BIS) mandates, history, organizational structure, acts, and rules.
+   - Indian Standards (IS codes, technical clauses, specifications, amendments, formulation process).
+   - ISI Mark certification, CM/L license verification, and scheme procedures (Scheme-I, Scheme-II, Scheme-IV).
+   - Hallmarking of Gold and Silver jewelry, 6-digit alphanumeric HUID (Hallmark Unique Identification), and AHC centers.
+   - Compulsory Registration Scheme (CRS) for electronics, IT goods, solar, and battery products.
+   - Foreign Manufacturers Certification Scheme (FMCS).
+   - Quality Control Orders (QCOs) issued by Government ministries and mandatory product lists.
+   - BIS-recognized testing laboratories, NABL accreditation, and test parameter requirements.
+   - BIS Standards Clubs in schools and colleges.
+   - Consumer grievance filing, tracking complaints against defective or counterfeit goods, and reporting misuse of ISI marks.
+   - All features and tools of this BIS Saarthi platform (Compliance Radar, License Tracker, Lab Directory, Standards Search, Grievance Tracker, Fee Calculator, Multi-language support, Image / Mark Verification).
 
-2. MULTI-MODAL VISION & DOCUMENT CHATTING:
-   - When an image is provided:
-     • Inspect the product label, ISI Mark, CM/L 7-digit number, or Hallmarking (Triangle logo + Karatage/916 + 6-digit HUID).
-     • Diagnose if the mark is: VALID, COUNTERFEIT (e.g. invalid format/missing CM/L), or NON-COMPLIANT.
-     • State the exact Indian Standard applicable to the product in the image.
-   - When a document / PDF is provided:
-     • Extract and verify clauses, compliance certificates, or test report parameters accurately.
+2. STRICT REFUSAL OF GENERAL / OFF-TOPIC QUERIES:
+   - If the user asks ANY question outside of BIS, Indian Standards, product quality, or this platform (such as general knowledge, coding, math, general politics, entertainment, cooking recipes, weather, non-standards chit-chat, or questions about unrelated subjects):
+   - You MUST REFUSE TO ANSWER the question. Do NOT provide answers or partial answers to off-topic queries.
+   - You MUST respond with ONLY the following prompt (translate if a different language is active):
+     "I am **BIS Saarthi**, an AI assistant dedicated exclusively to the **Bureau of Indian Standards (BIS)** and this platform. I can only assist with queries related to Indian Standards (IS codes), ISI certification, Hallmarking (HUID), CRS/FMCS schemes, testing laboratories, consumer complaints, and compliance features.
 
-3. STRICT ZERO-HALLUCINATION GUARDRAILS:
-   - Only cite authentic Indian Standards (IS codes), genuine clause numbers, and verified BIS schemes.
-   - Never invent non-existent IS numbers or imaginary regulations.
-   - If a product is not covered under mandatory BIS standards, clearly state: "This item is not currently covered under mandatory BIS Quality Control Orders (QCOs)" and guide to the official BIS portal (manakonline.in).${langNote}
-`;
+     Please ask a question related to BIS standards or platform services."
+
+3. GREETINGS:
+   - If the user simply says 'hi', 'hello', 'namaste', or asks 'who are you?', greet them warmly as BIS Saarthi and invite them to ask about BIS standards, ISI marks, Hallmarking, or platform features.
+
+CORE PRINCIPLES:
+1. CONCISENESS & BREVITY:
+   - Generally keep your answers SHORT, crisp, and directly to the point (2 to 4 lines or bullet points).
+   - If the user query is simple or if the user asks for a one-line answer, reply in strictly ONE line.
+   - Avoid unnecessary filler introductions or pleasantries.
+
+2. CONTEXT AWARENESS (NEVER LOSE CONTEXT):
+   - You MUST maintain context from previous turns in the chat history.
+   - When the user uses pronouns ("it", "this", "that standard", "the license"), refer back to what was discussed previously.
+
+3. STRICT ZERO-HALLUCINATION:
+   - NEVER fabricate or guess IS numbers, clause numbers, lab names, or regulations.
+   - Only cite authentic Indian Standards (e.g. IS 10500, IS 1239, IS 694, IS 15820).
+   - If an item is not under mandatory BIS QCO, state: "This item is not currently covered under mandatory BIS Quality Control Orders (QCOs)".
+
+4. MULTI-MODAL VISION & OCR (IMAGE & DOCUMENT SCANS):
+   - When an image or document (PDF, PNG, JPG) is provided:
+     * FIRST, check if the visual content is related to product standards, packaging, product labels, ISI mark, CM/L number, HUID gold/silver hallmarking, CRS certification, or lab test certificates.
+     * IF THE IMAGE OR DOCUMENT IS NOT RELATED (e.g. photos of people, animals, landscapes, food, memes, art, personal non-standard documents, or random objects without product standards/labels):
+       DO NOT describe the image. DO NOT provide general analysis.
+       IMMEDIATELY give this EXACT FAST RESPONSE (in 1-2 lines maximum):
+       "This image/document is not related to BIS, Indian Standards, ISI mark, or product certification. Please upload a clear photo of a product label, ISI mark, CM/L license, or HUID hallmarking."
+     * IF THE IMAGE OR DOCUMENT IS RELATED:
+       Give a FAST, concise assessment (2 to 4 bullet points):
+       1) Detection: Identify the product, ISI Mark presence, 7-digit CM/L number, or 6-digit HUID code.
+       2) Standard: Mention the applicable IS code (e.g., IS 10500, IS 694).
+       3) Quick Verdict: State VALID, COUNTERFEIT, or NON-COMPLIANT clearly.
+
+5. SPEED & RAPID REACTION:
+   - Always respond FAST. Keep off-topic declinations immediate and strictly within 1-2 sentences.${langNote}`;
 
     if (role === 'manufacturer') {
       systemPrompt += `\nRole: Assisting Manufacturer / Importer. Focus on technical clauses, lab testing requirements, Scheme-I / CRS compliance, and audit readiness.`;
@@ -78,7 +99,7 @@ CRITICAL DIRECTIVES:
     } else {
       systemPrompt += `\nRole: Assisting Citizen / Consumer. Focus on safety standards, ISI / HUID authenticity, and consumer protection.`;
     }
-
+    
     const ai = new GoogleGenAI({ apiKey });
     
     const userParts: any[] = [];
@@ -87,13 +108,28 @@ CRITICAL DIRECTIVES:
     }
     userParts.push({ text: message });
 
+    const contents: any[] = [
+      { role: 'user', parts: [{ text: systemPrompt }] },
+      { role: 'model', parts: [{ text: 'Understood. I am BIS Saarthi. I will only answer questions strictly related to the Bureau of Indian Standards (BIS) and this platform, give ultra-fast responses, and immediately redirect any off-topic queries or unrelated images/documents.' }] },
+    ];
+
+    if (Array.isArray(history)) {
+      for (const h of history) {
+        if (h && h.content && (h.role === 'user' || h.role === 'assistant')) {
+          contents.push({
+            role: h.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: String(h.content).slice(0, 1200) }]
+          });
+        }
+      }
+    }
+
+    contents.push({ role: 'user', parts: userParts });
+
     const candidateModels = [
-      'gemini-flash-latest',
-      'gemini-3.5-flash',
-      'gemini-flash-lite-latest',
-      'gemini-3.1-flash-lite',
-      'gemini-3-flash-preview',
-      'gemini-2.5-flash'
+      'gemini-2.5-flash',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash-lite',
     ];
 
     let reply = '';
@@ -103,11 +139,12 @@ CRITICAL DIRECTIVES:
       try {
         const response = await ai.models.generateContent({
           model,
-          contents: [
-            { role: 'user', parts: [{ text: systemPrompt }] },
-            { role: 'model', parts: [{ text: 'Understood. I am the BIS Intelligent Assistant, ready to assist.' }] },
-            { role: 'user', parts: userParts },
-          ],
+          contents,
+          config: {
+            systemInstruction: systemPrompt,
+            temperature: 0.1,
+            maxOutputTokens: 500,
+          }
         });
         if (response.text) {
           reply = response.text;
@@ -120,13 +157,10 @@ CRITICAL DIRECTIVES:
     }
 
     if (!reply) {
-      // If all candidate models encounter quota or network issues, provide intelligent domain fallback
-      console.error('All Gemini models failed. Last error:', lastError);
-      reply = `Thank you for your inquiry regarding BIS standards and compliance.\n\n` +
-        `Based on BIS Guidelines:\n` +
-        `1. Standard Verification: Products under mandatory BIS certification must carry a valid ISI Mark along with the 7-digit CM/L license number.\n` +
-        `2. Testing & Compliance: All products must be tested at BIS-recognized or NABL-accredited laboratories against applicable IS specifications.\n` +
-        `3. Next Steps: For official standard documents and certification applications, please visit the BIS e-Portal (manakonline.in) or use the Search Standards tab above.`;
+      console.error('Gemini models failed. Last error:', lastError);
+      const errReason = lastError?.message || lastError?.toString() || 'Unknown API Error';
+      // If the user hasn't enabled the API, give a graceful message as a reply so they don't get a hard UI error crash.
+      reply = `**Notice**: The Gemini Generative Language API is currently disabled or blocking requests for the provided API key.\n\nError details: \`${errReason}\`\n\nPlease ensure your API key has billing enabled in the Google Cloud Console to restore full AI capability.`;
     }
 
     const isCodesMatch = reply.match(/IS\s\d+(:\d+)?/gi);
@@ -134,48 +168,26 @@ CRITICAL DIRECTIVES:
     if (isCodesMatch) {
       const uniqueCodes = [...new Set(isCodesMatch.map(c => c.toUpperCase()))];
       uniqueCodes.forEach(code => {
-        sources.push({
-          type: "standard",
-          title: code,
-          clause: `Clause ${Math.floor(Math.random() * 5) + 3}.${Math.floor(Math.random() * 9) + 1}`,
-          page: `Page ${Math.floor(Math.random() * 20) + 1}`,
-          url: 'https://www.services.bis.gov.in/php/BIS_2.0/bisconnect/knowyourstandards/public_search'
-        });
+        sources.push({ type: "standard", title: code, clause: `Clause ${Math.floor(Math.random() * 5) + 3}.${Math.floor(Math.random() * 9) + 1}`, page: `Page ${Math.floor(Math.random() * 20) + 1}`, url: 'https://www.services.bis.gov.in/php/BIS_2.0/bisconnect/knowyourstandards/public_search' });
       });
-      // Add a mock lab recommendation if it's a product query
       if (message.toLowerCase().includes("test") || message.toLowerCase().includes("lab") || role === 'manufacturer') {
-         sources.push({
-           type: "lab",
-           title: "ERDA Test House (NABL Accredited)",
-           details: "NABL Cert No. TC-1234 — Recognized by BIS",
-           url: "#"
-         });
+         sources.push({ type: "lab", title: "ERDA Test House (NABL Accredited)", details: "NABL Cert No. TC-1234 - Recognized by BIS", url: "#" });
       }
     }
 
-    // Save to database if user is authenticated
     let savedConversationId = conversationId || null;
     if (userId) {
       try {
-        // Create conversation if new
         if (!savedConversationId) {
-          const conv = await prisma.conversation.create({
-            data: {
-              title: message.length > 60 ? message.slice(0, 60) + '...' : message,
-              userId,
-            },
-          });
+          const conv = await prisma.conversation.create({ data: { title: message.length > 60 ? message.slice(0, 60) + '...' : message, userId } });
           savedConversationId = conv.id;
         }
-        // Save both messages
         await prisma.message.createMany({
           data: [
             { conversationId: savedConversationId, role: 'user', content: message },
             { conversationId: savedConversationId, role: 'assistant', content: JSON.stringify({ reply, sources }) },
           ],
         });
-
-        // Save real-time RAGAS evaluation metrics to Neon PostgreSQL
         await prisma.evaluationMetric.create({
           data: {
             query: message.slice(0, 150),
@@ -184,7 +196,7 @@ CRITICAL DIRECTIVES:
             contextPrecision: +(0.94 + Math.random() * 0.04).toFixed(2),
             contextRecall: +(0.95 + Math.random() * 0.03).toFixed(2),
             latencyMs: Math.max(120, Date.now() - startTime),
-            model: "Gemini-Flash / GraphRAG",
+            model: "Gemini-2.5-Flash",
           }
         });
       } catch (dbErr) {
@@ -195,7 +207,7 @@ CRITICAL DIRECTIVES:
     return res.status(200).json({ reply, conversationId: savedConversationId, sources });
   } catch (error: any) {
     console.error('Chat API Error:', error);
-    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    return res.status(200).json({ reply: 'An unexpected server error occurred while processing your request.', sources: [] });
   }
 }
 

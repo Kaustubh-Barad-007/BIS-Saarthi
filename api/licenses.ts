@@ -1,17 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
-
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-for-demo";
-
-function getUserId(req: VercelRequest): { userId: string; role: string } | null {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return null;
-  try {
-    return jwt.verify(token, JWT_SECRET) as any;
-  } catch { return null; }
-}
+import { getUserIdFromHeader } from '../src/server/utils/auth.js';
+import { licenseService } from '../src/server/services/licenseService.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -20,30 +9,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
-    const decoded = getUserId(req);
+    const decoded = getUserIdFromHeader(req.headers.authorization);
     if (!decoded) return res.status(401).json({ error: "Unauthorized" });
 
     if (req.method === "GET") {
-      const where = decoded.role === "admin" ? {} : { userId: decoded.userId };
-      const licenses = await prisma.license.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        include: { user: { select: { name: true, email: true } } },
-      });
+      const licenses = await licenseService.getLicenses(decoded.userId, decoded.role);
       return res.status(200).json(licenses);
     }
 
     if (req.method === "POST") {
       const { product, isCode } = req.body;
-      if (!product || !isCode) return res.status(400).json({ error: "Missing required fields" });
-      const license = await prisma.license.create({
-        data: {
-          userId: decoded.userId,
-          product,
-          isCode,
-          status: "pending",
-        },
-      });
+      const license = await licenseService.applyForLicense(decoded.userId, product, isCode);
       return res.status(201).json(license);
     }
 
@@ -52,21 +28,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { id, status, licenseNo, validUntil } = req.body;
       if (!id) return res.status(400).json({ error: "Missing license id" });
       
-      const updateData: any = { status };
-      if (licenseNo) updateData.licenseNo = licenseNo;
-      if (validUntil) updateData.validUntil = new Date(validUntil);
-      else if (status === "active") updateData.validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year by default
-
-      const updated = await prisma.license.update({
-        where: { id },
-        data: updateData,
-      });
+      const updated = await licenseService.updateLicenseStatus(id, status, licenseNo, validUntil);
       return res.status(200).json(updated);
     }
 
     return res.status(405).json({ error: "Method not allowed" });
   } catch (error: any) {
     console.error("Licenses error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    if (error.message === "Missing required fields") return res.status(400).json({ error: error.message });
+    return res.status(503).json({ error: "License service temporarily unavailable. Please try again." });
   }
 }

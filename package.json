@@ -1,5 +1,5 @@
 {
-  "name": "bis-assistant",
+  "name": "bis-saarthi",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -37,9 +37,12 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.37.0",
     "nodemailer": "^9.0.6",
+    "pdf-parse": "^2.4.5",
+    "puppeteer": "^25.9.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "tesseract.js": "^7.0.0"
   }
 }

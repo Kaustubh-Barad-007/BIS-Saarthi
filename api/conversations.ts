@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
+import { prisma } from '../src/server/db/client.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-demo';
 
 function getUserId(req: VercelRequest): string | null {
@@ -74,6 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err: any) {
     console.error('Conversations error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(503).json({ error: 'Could not process request. Please try again.' });
   }
 }
+
