@@ -1270,9 +1270,16 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                         <div className="msg-bubble ai prose" dangerouslySetInnerHTML={{ __html: renderContent(messages[0].content) }} />
                         <div className="suggestion-grid" style={{ marginTop: 24 }}>
                           {getSuggestions(userRole, language).map((q, i) => (
-                            <button key={i} className="suggestion-card" onClick={() => sendMessage(q)}>
+                            <motion.button 
+                              initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              transition={{ duration: 0.25, delay: i * 0.08, ease: [0.2, 0.8, 0.2, 1] }}
+                              key={i} 
+                              className="suggestion-card" 
+                              onClick={() => sendMessage(q)}
+                            >
                               {q}
-                            </button>
+                            </motion.button>
                           ))}
                         </div>
                       </div>
@@ -1281,8 +1288,9 @@ export default function Chat({ userRole = 'consumer', hideSidebar = false }: Pro
                     {messages.slice(messages.length === 1 ? 1 : 0).map((msg, i, arr) => (
                       <motion.div
                         key={msg.id}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
                         className="message-row"
                         style={{ justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}
                       >

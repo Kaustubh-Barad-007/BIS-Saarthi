@@ -38,13 +38,20 @@ export function FAQ({ setActiveView }: { setActiveView: (v: string) => void }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 800, marginBottom: 32 }}>
         {faqItems.map((item, i) => (
-          <details key={i} className="faq-details" style={{ background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 16, padding: '16px 20px', cursor: 'pointer', transition: 'all 0.2s' }}>
+          <motion.details 
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.25, delay: i * 0.05, ease: 'easeOut' }}
+            key={i} 
+            className="faq-details panel" 
+            style={{ borderRadius: 16, padding: '16px 20px', cursor: 'pointer', transition: 'all 0.2s' }}
+          >
             <summary style={{ fontWeight: 600, color: 'var(--text-primary)', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {item.q}
               <span className="faq-icon" style={{ color: 'var(--accent)', fontSize: '1.2rem', transition: 'transform 0.2s' }}>+</span>
             </summary>
             <p style={{ marginTop: 14, color: 'var(--text-secondary)', fontSize: '0.9375rem', lineHeight: 1.6, paddingBottom: 4 }}>{item.a}</p>
-          </details>
+          </motion.details>
         ))}
       </div>
     </motion.div>

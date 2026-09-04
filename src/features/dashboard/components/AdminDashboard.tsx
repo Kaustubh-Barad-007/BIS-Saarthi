@@ -221,8 +221,13 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               <tr><th>Req ID</th><th>Manufacturer</th><th>IS Code / Product</th><th>License No</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
-              {allLicenses.map((l: any) => (
-                <tr key={l.id}>
+              {allLicenses.map((l: any, i: number) => (
+                <motion.tr 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: i * 0.05, ease: 'easeOut' }}
+                  key={l.id}
+                >
                   <td><span style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: "var(--text-muted)" }}>#{l.id.slice(0,8).toUpperCase()}</span></td>
                   <td style={{ fontWeight: 500 }}>{l.user?.name || l.user?.email || "Unknown"}</td>
                   <td><span className="pill pill-blue" style={{ marginBottom: 4 }}>{l.isCode}</span><br /><span style={{ fontSize: "0.8rem", color: "var(--text-muted)"}}>{l.product}</span></td>
@@ -243,7 +248,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
                   <td style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>
                     {l.validUntil ? new Date(l.validUntil).toLocaleDateString("en-IN") : "-"}
                   </td>
-                </tr>
+                </motion.tr>
               ))}
               {allLicenses.length === 0 && (
                 <tr><td colSpan={6}><div className="empty-state"><p>No licenses found.</p></div></td></tr>
@@ -265,8 +270,13 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               <tr><th>ID</th><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th>Action</th></tr>
             </thead>
             <tbody>
-              {allComplaints.map((c: any) => (
-                <tr key={c.id}>
+              {allComplaints.map((c: any, i: number) => (
+                <motion.tr 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: i * 0.05, ease: 'easeOut' }}
+                  key={c.id}
+                >
                   <td><span style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: "var(--text-muted)", cursor: "pointer" }} title={c.id}>#{c.id.slice(0,8).toUpperCase()}</span></td>
                   <td style={{ fontWeight: 500 }}>{c.user?.name || c.user?.email || "Unknown"}</td>
                   <td style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.details}>{c.subject}</td>
@@ -277,7 +287,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
                   <td>
                      <button className="btn btn-xs btn-ghost" style={{ borderRadius: 8 }} onClick={() => { setSelectedComplaint(c); setUpdateStatus(c.status); setUpdateNote(c.adminNote || ""); }}>View & Update</button>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
               {allComplaints.length === 0 && (
                 <tr><td colSpan={6}><div className="empty-state"><div className="empty-state-icon"><Shield size={24} style={{ opacity: 0.4 }} /></div><p>No complaints found.</p></div></td></tr>
@@ -299,8 +309,13 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               <tr><th>Request ID</th><th>User</th><th>Club Name</th><th>Status</th><th>Date</th><th>Action</th></tr>
             </thead>
             <tbody>
-              {clubRequests.map((r: any) => (
-                <tr key={r.id}>
+              {clubRequests.map((r: any, i: number) => (
+                <motion.tr 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: i * 0.05, ease: 'easeOut' }}
+                  key={r.id}
+                >
                   <td><span style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: "var(--text-muted)" }}>#{r.id.slice(0,8).toUpperCase()}</span></td>
                   <td style={{ fontWeight: 500 }}>{r.user?.name || r.user?.email || "Unknown"}</td>
                   <td>{r.clubName}</td>
@@ -309,9 +324,9 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
                   </td>
                   <td style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>{new Date(r.createdAt).toLocaleDateString("en-IN")}</td>
                   <td>
-                     <button className="btn btn-xs btn-ghost" style={{ borderRadius: 8 }} onClick={() => { setSelectedClubReq(r); setUpdateStatus(r.status); }}>View & Update</button>
+                     <button className="btn btn-xs btn-ghost" style={{ borderRadius: 8 }} onClick={() => { setSelectedClubReq(r); setUpdateStatus(r.status); }}>Review Request</button>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
               {clubRequests.length === 0 && (
                 <tr><td colSpan={6}><div className="empty-state"><div className="empty-state-icon"><Users size={24} style={{ opacity: 0.4 }} /></div><p>No club requests found.</p></div></td></tr>
@@ -365,12 +380,17 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
                 <tr><th>Date</th><th>Title</th><th>Affected Codes</th></tr>
               </thead>
               <tbody>
-                {broadcasts.map((b: any) => (
-                  <tr key={b.id}>
+                {broadcasts.map((b: any, i: number) => (
+                  <motion.tr 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: i * 0.05, ease: 'easeOut' }}
+                    key={b.id}
+                  >
                     <td style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>{new Date(b.createdAt).toLocaleDateString("en-IN")}</td>
                     <td style={{ fontWeight: 500 }}>{b.title}</td>
                     <td>{b.affectedISCodes ? <span className='pill pill-blue'>{b.affectedISCodes}</span> : <span style={{color: 'var(--text-muted)'}}>General</span>}</td>
-                  </tr>
+                  </motion.tr>
                 ))}
                 {broadcasts.length === 0 && (
                   <tr><td colSpan={3}><div className="empty-state"><p>No broadcasts found.</p></div></td></tr>
@@ -386,7 +406,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
         <>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 28 }}>
             {cards.map((card, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} className="stat-card">
+              <motion.div key={i} initial={{ opacity: 0, y: 16, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: i * 0.06, duration: 0.25, ease: 'easeOut' }} className="stat-card">
                 <div className="stat-icon" style={{ background: card.bg, color: card.color }}>{card.icon}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{card.label}</div>

@@ -56,7 +56,14 @@ export function StandardsDirectory({ setActiveView }: { setActiveView: (v: strin
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 900 }}>
           {filteredResults.map((std: any, i: number) => (
-            <div key={i} style={{ padding: 20, background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 16 }}>
+            <motion.div 
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25, delay: i * 0.05, ease: 'easeOut' }}
+              key={i} 
+              className="panel"
+              style={{ padding: 20, background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 16 }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--accent)' }}>{std.code}</h3>
                 {std.mandatory && <span className="pill pill-red" style={{ fontSize: '0.7rem' }}>{t('mandatory')} ({std.scheme})</span>}
@@ -66,7 +73,7 @@ export function StandardsDirectory({ setActiveView }: { setActiveView: (v: strin
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Library size={14} /> {std.category}</span>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

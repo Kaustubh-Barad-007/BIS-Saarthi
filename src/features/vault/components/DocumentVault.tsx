@@ -31,7 +31,14 @@ export function DocumentVault({ setActiveView }: { setActiveView: (v: string) =>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
           {documents.map((file, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'var(--bg-hover)', border: '1px solid var(--border-glass)', borderRadius: 16, flexWrap: 'wrap', gap: 10 }}>
+            <motion.div 
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25, delay: i * 0.05, ease: 'easeOut' }}
+              key={i} 
+              className="panel"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderRadius: 16, flexWrap: 'wrap', gap: 10 }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ padding: 8, background: 'var(--accent-muted)', color: 'var(--accent)', borderRadius: 10 }}>
                   <FileText size={18} />
@@ -49,7 +56,7 @@ export function DocumentVault({ setActiveView }: { setActiveView: (v: string) =>
                 <button className="btn btn-ghost btn-sm" style={{ padding: '0 10px', height: 32 }}><Download size={14} /></button>
                 <button className="btn btn-ghost btn-sm" style={{ padding: '0 10px', height: 32, color: 'var(--danger)' }}><Trash2 size={14} /></button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
         

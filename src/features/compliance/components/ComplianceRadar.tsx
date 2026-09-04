@@ -207,8 +207,13 @@ export function ComplianceRadar({ setActiveView }: { setActiveView: (v: string) 
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map(item => (
-                  <tr key={item.id}>
+                {filteredItems.map((item, index) => (
+                  <motion.tr 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.05, ease: 'easeOut' }}
+                    key={item.id}
+                  >
                     <td>
                       <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.productName}</div>
                     </td>
@@ -239,7 +244,7 @@ export function ComplianceRadar({ setActiveView }: { setActiveView: (v: string) 
                         <Trash2 size={14} /> Remove
                       </button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
@@ -273,7 +278,13 @@ export function ComplianceRadar({ setActiveView }: { setActiveView: (v: string) 
               type: 'Scheme-II CRS'
             }
           ].map((bulletin, idx) => (
-            <div key={idx} style={{ padding: 16, background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.25, delay: idx * 0.1, ease: 'easeOut' }}
+              key={idx} 
+              style={{ padding: 16, background: 'var(--bg-glass-strong)', border: '1px solid var(--border-glass)', borderRadius: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}
+            >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                   <span className="pill pill-amber" style={{ fontSize: '0.7rem' }}>{bulletin.type}</span>
@@ -288,7 +299,7 @@ export function ComplianceRadar({ setActiveView }: { setActiveView: (v: string) 
               >
                 View Standard
               </button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
