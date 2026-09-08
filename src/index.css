@@ -1513,3 +1513,13 @@ body {
 .faq-details[open] .faq-icon {
   transform: rotate(45deg);
 }
+
+.map-modal-container { display: flex; flex-direction: row; height: 65vh; }
+.map-modal-map { flex: 1; min-height: 100%; background: #e5e7eb; position: relative; }
+.map-modal-details { flex: 0 0 350px; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; }
+
+@media (max-width: 768px) {
+  .map-modal-container { flex-direction: column; height: 90vh; }
+  .map-modal-map { min-height: 45%; }
+  .map-modal-details { flex: none; }
+}

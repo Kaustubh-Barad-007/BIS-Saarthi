@@ -34,5 +34,4 @@ dist-ssr
 *.cjs
 *.bak
 *.txt
-
-.vercel
+_backup_gov_pages/

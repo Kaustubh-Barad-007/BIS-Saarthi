@@ -3,8 +3,9 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthContext';
 import { useTheme } from '@/app/providers/ThemeContext';
 import { useLanguage } from '@/app/providers/LanguageContext';
-import { LogOut, Sun, Moon, LayoutDashboard, FileText, Library, AlertTriangle, Settings, Menu, X, Radio } from 'lucide-react';
+import { LogOut, Sun, Moon, LayoutDashboard, FileText, Library, AlertTriangle, Settings, Menu, X, Radio, Globe } from 'lucide-react';
 import AdminDashboard from '@/features/dashboard/components/AdminDashboard';
+import { GovReporting } from '@/features/dashboard/components/GovReporting';
 import Chat from './Chat';
 import Logo from '@/components/Logo';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -29,6 +30,7 @@ export default function DashboardRouter() {
     { label: 'Club Requests', icon: <Library size={16} /> },
     { label: 'Complaints', icon: <AlertTriangle size={16} /> },
     { label: 'Broadcasts', icon: <Radio size={16} /> },
+    { label: 'Gov Audit', icon: <Globe size={16} /> },
     { label: 'Settings', icon: <Settings size={16} /> },
   ];
 
@@ -66,7 +68,7 @@ export default function DashboardRouter() {
       </AnimatePresence>
 
       {/* Mobile Topbar */}
-      <div className="topbar mobile-only" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 60, background: 'var(--bg-glass-strong)', borderBottom: '1px solid var(--border-glass)', zIndex: 40, alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
+      <div className="topbar mobile-only" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 60, background: 'var(--bg-glass)', borderBottom: '1px solid var(--border-glass)', zIndex: 40, alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo size={20} />
           <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t('admin')}</span>
@@ -88,7 +90,7 @@ export default function DashboardRouter() {
 
       {/* Admin Sidebar Desktop */}
       <aside className="sidebar desktop-only" style={{
-        width: 240, background: 'var(--bg-glass-strong)', borderRight: '1px solid var(--border-glass)',
+        width: 240, background: 'var(--bg-glass)', borderRight: '1px solid var(--border-glass)',
         display: 'flex', flexDirection: 'column', flexShrink: 0, backdropFilter: 'var(--blur-glass)'
       }}>
         <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border-glass)', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -128,7 +130,7 @@ export default function DashboardRouter() {
         {mobileMenuOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'none', zIndex: 45 }} />
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.3 }} style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: 280, background: 'var(--bg-glass-strong)', zIndex: 50, display: 'flex', flexDirection: 'column', boxShadow: '4px 0 40px rgba(0,0,0,0.5)' }}>
+            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.3 }} style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: 280, background: 'var(--bg-glass)', zIndex: 50, display: 'flex', flexDirection: 'column', boxShadow: '4px 0 40px rgba(0,0,0,0.5)' }}>
               <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-glass)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <Logo size={24} />
@@ -203,10 +205,15 @@ export default function DashboardRouter() {
         {/* Scrollable Dashboard View */}
         <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
           <Routes>
-            <Route path="/" element={<AdminDashboard activeTab={activeTab} />} />
+            <Route path="/" element={
+              activeTab === 'Gov Audit' ? <GovReporting /> : <AdminDashboard activeTab={activeTab} />
+            } />
           </Routes>
         </div>
       </div>
     </div>
   );
 }
+
+
+

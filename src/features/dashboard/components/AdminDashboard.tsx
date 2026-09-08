@@ -42,6 +42,15 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
     setTimeout(() => setToast(null), 4000);
   };
   const [grantModalLicense, setGrantModalLicense] = useState<{ id: string; licenseNo: string } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const getStatusPillClass = (status: string) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'resolved' || s === 'approved' || s === 'active' || s === 'granted') return 'pill-green';
+    if (s === 'rejected' || s === 'revoked' || s === 'expired') return 'pill-red';
+    if (s === 'under_review' || s === 'reviewing') return 'pill-blue';
+    return 'pill-amber';
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -89,6 +98,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
 
   const saveModalComplaint = async () => {
     if (!selectedComplaint) return;
+    setIsSaving(true);
     const activeToken = token || (typeof window !== "undefined" ? (localStorage.getItem("jwt_token") || localStorage.getItem("token") || "") : "");
     try {
       const res = await fetch("/api/complaints", {
@@ -108,10 +118,12 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
         showToast(data.error || `Failed to update complaint. Status: ${res.status}`, "error");
       }
     } catch (err: any) { showToast(`Network error: ${err.message || 'Could not connect to server'}`, "error"); }
+    finally { setIsSaving(false); }
   };
 
   const saveModalClubReq = async () => {
     if (!selectedClubReq) return;
+    setIsSaving(true);
     const activeToken = token || (typeof window !== "undefined" ? (localStorage.getItem("jwt_token") || localStorage.getItem("token") || "") : "");
     try {
       const res = await fetch("/api/clubs", {
@@ -130,6 +142,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
         showToast(data.error || `Failed to update club request. Status: ${res.status}`, "error");
       }
     } catch (err: any) { showToast(`Network error: ${err.message || 'Could not connect to server'}`, 'error'); }
+    finally { setIsSaving(false); }
   };
 
   const handleUpdateLicense = async (id: string, status: string, customLicenseNo?: string) => {
@@ -281,7 +294,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
                   <td style={{ fontWeight: 500 }}>{c.user?.name || c.user?.email || "Unknown"}</td>
                   <td style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.details}>{c.subject}</td>
                   <td>
-                    <span className='pill pill-amber' style={{ textTransform: 'capitalize' }}>{c.status.replace('_', ' ')}</span>
+                    <span className={`pill ${getStatusPillClass(c.status)}`} style={{ textTransform: 'capitalize' }}>{c.status.replace('_', ' ')}</span>
                   </td>
                   <td style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>{new Date(c.createdAt).toLocaleDateString("en-IN")}</td>
                   <td>
@@ -320,7 +333,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
                   <td style={{ fontWeight: 500 }}>{r.user?.name || r.user?.email || "Unknown"}</td>
                   <td>{r.clubName}</td>
                   <td>
-                    <span className='pill pill-amber' style={{ textTransform: 'capitalize' }}>{r.status}</span>
+                    <span className={`pill ${getStatusPillClass(r.status)}`} style={{ textTransform: 'capitalize' }}>{r.status}</span>
                   </td>
                   <td style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>{new Date(r.createdAt).toLocaleDateString("en-IN")}</td>
                   <td>
@@ -438,7 +451,7 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
                       <td><span style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: "var(--text-muted)" }}>#{c.id}</span></td>
                       <td style={{ fontWeight: 500 }}>{c.user}</td>
                       <td style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.subject}</td>
-                      <td><span className='pill pill-amber'>{c.status}</span></td>
+                      <td><span className={`pill ${getStatusPillClass(c.status)}`} style={{ textTransform: 'capitalize' }}>{c.status.replace('_', ' ')}</span></td>
                       <td style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>{new Date(c.date).toLocaleDateString("en-IN")}</td>
                     </tr>
                   ))}
@@ -615,7 +628,14 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                 <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setSelectedComplaint(null)}>Cancel</button>
-                <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, fontWeight: 600 }} onClick={saveModalComplaint}>Save Changes</button>
+                <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, fontWeight: 600 }} onClick={saveModalComplaint} disabled={isSaving}>
+                    {isSaving ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                        Saving...
+                      </span>
+                    ) : 'Save Changes'}
+                  </button>
               </div>
             </motion.div>
           </div>
@@ -679,7 +699,14 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
               
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                 <button className="btn btn-ghost" style={{ padding: '0 20px', height: 44 }} onClick={() => setSelectedClubReq(null)}>Cancel</button>
-                <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, fontWeight: 600 }} onClick={saveModalClubReq}>Save Changes</button>
+                <button className="btn btn-primary" style={{ padding: '0 24px', height: 44, fontWeight: 600 }} onClick={saveModalClubReq} disabled={isSaving}>
+                    {isSaving ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                        Saving...
+                      </span>
+                    ) : 'Save Changes'}
+                  </button>
               </div>
             </motion.div>
           </div>
@@ -738,6 +765,10 @@ export default function AdminDashboard({ activeTab = "Dashboard" }: { activeTab?
     </div>
   );
 }
+
+
+
+
 
 
 

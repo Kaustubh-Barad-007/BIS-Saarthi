@@ -76,6 +76,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where,
       orderBy: { name: "asc" },
     });
+
+    const MAHARASHTRA_CLUBS = [
+      { id: "MHC-01", name: "VJTI Standards Club", city: "Mumbai", state: "Maharashtra", members: 185, type: "College", established: "2018", contact: "standards@vjti.ac.in" },
+      { id: "MHC-02", name: "COEP Standards Club", city: "Pune", state: "Maharashtra", members: 210, type: "College", established: "2017", contact: "club@coep.ac.in" },
+      { id: "MHC-03", name: "IIT Bombay Standards Club", city: "Mumbai", state: "Maharashtra", members: 340, type: "University", established: "2015", contact: "standards@iitb.ac.in" },
+      { id: "MHC-04", name: "SPIT Standards Club", city: "Mumbai", state: "Maharashtra", members: 110, type: "College", established: "2019", contact: "spit.standards@spit.ac.in" },
+      { id: "MHC-05", name: "MIT WPU Standards Club", city: "Pune", state: "Maharashtra", members: 155, type: "University", established: "2020", contact: "bis.club@mitwpu.edu.in" },
+      { id: "MHC-06", name: "VNIT Standards Club", city: "Nagpur", state: "Maharashtra", members: 190, type: "University", established: "2018", contact: "standards@vnit.ac.in" },
+      { id: "MHC-07", name: "Walchand College Standards Club", city: "Sangli", state: "Maharashtra", members: 95, type: "College", established: "2021", contact: "wce.bis@walchandsangli.ac.in" },
+      { id: "MHC-08", name: "KJ Somaiya Standards Club", city: "Mumbai", state: "Maharashtra", members: 130, type: "College", established: "2019", contact: "standards@somaiya.edu" },
+      { id: "MHC-09", name: "PICT Standards Club", city: "Pune", state: "Maharashtra", members: 175, type: "College", established: "2018", contact: "bis@pict.edu" },
+      { id: "MHC-10", name: "SGGS Standards Club", city: "Nanded", state: "Maharashtra", members: 85, type: "College", established: "2022", contact: "club@sggs.ac.in" },
+      { id: "MHC-11", name: "VIT Standards Club", city: "Pune", state: "Maharashtra", members: 220, type: "College", established: "2017", contact: "bis@vit.edu" },
+      { id: "MHC-12", name: "DJSCE Standards Club", city: "Mumbai", state: "Maharashtra", members: 145, type: "College", established: "2020", contact: "standards@djsce.ac.in" },
+      { id: "MHC-13", name: "Fergusson College Standards Club", city: "Pune", state: "Maharashtra", members: 75, type: "College", established: "2021", contact: "bis@fergusson.edu" },
+      { id: "MHC-14", name: "St. Xavier's Standards Club", city: "Mumbai", state: "Maharashtra", members: 105, type: "College", established: "2019", contact: "standards@xaviers.edu" },
+      { id: "MHC-15", name: "Ruia College Standards Club", city: "Mumbai", state: "Maharashtra", members: 90, type: "College", established: "2020", contact: "bis@ruiacollege.edu" },
+    ];
+
+    const qStr = (typeof q === "string" ? q : (Array.isArray(q) ? q[0] : "")) || "";
+    if (!qStr || MAHARASHTRA_CLUBS.some(c => c.name.toLowerCase().includes(qStr.toLowerCase()) || c.city.toLowerCase().includes(qStr.toLowerCase()) || c.state.toLowerCase().includes(qStr.toLowerCase()))) {
+      const matchedMaha = MAHARASHTRA_CLUBS.filter(c => {
+        if (!qStr) return true;
+        const query = qStr.toLowerCase();
+        return c.name.toLowerCase().includes(query) || c.city.toLowerCase().includes(query) || c.state.toLowerCase().includes(query);
+      });
+      const existingNames = new Set(clubs.map(c => c.name));
+      clubs = [...clubs, ...matchedMaha.filter(c => !existingNames.has(c.name))] as any;
+    }
     
     if (clubs.length === 0) {
       const CLUBS_SEED = [
